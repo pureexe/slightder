@@ -8,7 +8,10 @@ import torch.nn.functional as F
 
 from inspect import isfunction
 
-from lora import LoRANetwork
+try:
+    from lora import LoRANetwork
+except:
+    from trainscripts.imagesliders.lora import LoRANetwork
 
 class GEGLU(nn.Module):
     def __init__(self, dim_in, dim_out):

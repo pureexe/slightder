@@ -1,19 +1,37 @@
 OBJECTS = [
     'shoe',
-    'cake',
-    'bottle',
-    'chair',
-    'cup',
-    'laptop',
-    'cell phone',
-    'keyboard',
-    'book',
-    'scissors',
+    # 'cake',
+    # 'bottle',
+    # 'chair',
+    # 'cup',
+    # 'laptop',
+    # 'cell phone',
+    # 'keyboard',
+    # 'book',
+    # 'scissors',
 ]
 
-#SCALES = [1.0, 2.5]
-SCALES = [-0.5, 0.5]
-SEEDS = [807, 200, 201, 202, 800]
+CONDITION_IMAGES = [
+     "datasets/scale-1_1/unsplash2000_clip/-1.00000000/last_hidden_states.pt",
+#     "datasets/scale-1_1/unsplash2000_clip/0.84577371/last_hidden_states.pt"
+]
+
+
+
+
+# CONDITION_IMAGES = [
+#     "datasets/scale-1_1/unsplash2000_convnext/-1.00000000/last_hidden_states.pt",
+#     "datasets/scale-1_1/unsplash2000_convnext/0.84577371/last_hidden_states.pt"
+# ]
+import numpy as np
+# CONDITION_IMAGES = [f"datasets/scale-1_1/rotate_studio_convnext/{idx:.8f}/last_hidden_states.pt" for idx in np.linspace(-1, 1, 360)]
+# CONDITION_IMAGES = [f"datasets/scale-1_1/rotate_studio_clip/{idx:.8f}/last_hidden_states.pt" for idx in np.linspace(-1, 1, 360)]
+
+
+#SCALES = [1.0, 2.0]
+# SEEDS = [148, 200, 201, 305, 312]
+SEEDS = [200]
+#SEEDS = range(300, 320)
 
 import torch
 from PIL import Image
@@ -38,13 +56,16 @@ from diffusers import AutoencoderKL, DDPMScheduler, DiffusionPipeline, UNet2DCon
 from diffusers.loaders import AttnProcsLayers
 from diffusers.models.attention_processor import LoRAAttnProcessor, AttentionProcessor
 from typing import Any, Dict, List, Optional, Tuple, Union
-from trainscripts.textsliders.lora import LoRANetwork, DEFAULT_TARGET_REPLACE, UNET_TARGET_REPLACE_MODULE_CONV
+from trainscripts.imagesliders.lora import LoRANetwork, DEFAULT_TARGET_REPLACE, UNET_TARGET_REPLACE_MODULE_CONV
+from trainscripts.imagesliders.pure_util.lora_global_adapter import LoRAGlobalAdapter
+from transformers import ConvNextImageProcessor, ConvNextModel
+
 
 ### CONFIGURATION
 width = 512
 height = 512 
 steps = 50  
-cfg_scale = 3
+cfg_scale = 7.5 
 pretrained_sd_model = "CompVis/stable-diffusion-v1-4"
 pretrained_model_name_or_path = "CompVis/stable-diffusion-v1-4"
 
@@ -53,11 +74,16 @@ device = 'cuda:0'
 rank = 4
 weight_dtype = torch.float32
 
-lora_weights = [
-    #"models/unsplash2000_alpha1.0_rank4_noxattn/unsplash2000_alpha1.0_rank4_noxattn_30000steps.pt"
-    "models/ball20k_latent_alpha1.0_rank4_noxattn/ball20k_latent_alpha1.0_rank4_noxattn_30000steps.pt"
-]
-output_dir = "output/unsplash2000/chkpt30000_-0.5_0.5/"
+# lora_weights = [
+#     "models/unsplash2000_lora_latent_clip_base_alpha1.0_rank4_noxattn/unsplash2000_lora_latent_clip_base_alpha1.0_rank4_noxattn_50000steps.pt"
+#     #"models/unsplash2000_lora_latent_convnext_base_alpha1.0_rank4_noxattn/unsplash2000_lora_latent_convnext_base_alpha1.0_rank4_noxattn_50000steps.pt"
+# ]
+
+
+lora_weights = [f"models/unsplash2000_lora_latent_clip_base_alpha1.0_rank4_noxattn/unsplash2000_lora_latent_clip_base_alpha1.0_rank4_noxattn_{idx}steps.pt" for idx in range(17000, 51000, 1000)]
+
+#output_dir = "output/unsplash2000_lora_latent/clip_base/chkpt20000/"
+output_dir = "output/unsplash2000_lora_latent/clip_base/vary_checkpoint/"
 PROMPTS = [ 
    "a photo of {}, blank gray background, solid background, shadow, heavy shadow, cast shadow",
 ]
@@ -85,6 +111,10 @@ def flush():
 flush()
 
 def main():
+    # loading ConvNext Pipeline
+    #convnext_processor = ConvNextImageProcessor.from_pretrained("facebook/convnext-base-224-22k")
+    #convnext_model = ConvNextModel.from_pretrained("facebook/convnext-base-224-22k").to("cuda")
+
     # sd1.4 default scheduler
     noise_scheduler = PNDMScheduler(
         beta_start=0.00085,
@@ -130,8 +160,6 @@ def main():
         for obj in OBJECTS:
             prompts.append(prompt.format(obj))
     
-    scales = SCALES
-
     # white background latent
     white_image = torch.zeros((1, 3, 512, 512)).to(device, dtype=weight_dtype)
     white_latents = vae.encode(white_image).latent_dist.sample()
@@ -142,8 +170,8 @@ def main():
         # for different seeds on same prompt
         for _ in range(num_images_per_prompt):
             #seed = random.randint(0, 5000)
-            for lora_weight in lora_weights:
-            
+            for lora_id, lora_weight in enumerate(lora_weights):
+                lora_id = lora_id + 17
                 if 'full' in lora_weight:
                     train_method = 'full'
                 elif 'noxattn' in lora_weight:
@@ -176,23 +204,33 @@ def main():
                     rank = 8
                 if 'alpha1' in lora_weight:
                     alpha = 1.0
-                network = LoRANetwork(
+                network = LoRAGlobalAdapter(
                         unet,
                         rank=rank,
                         multiplier=1.0,
                         alpha=alpha,
                         train_method=train_method,
+                        global_dim=768,
+                        converter_dim=1024*7*7,
                     ).to(device, dtype=weight_dtype)
+                
                 network.load_state_dict(torch.load(lora_weight))
                 images_list = []
 
                 os.makedirs(output_dir, exist_ok=True)
 
-                for scale_id, scale in enumerate(scales):
-                    # if scale_id == 0:
-                    #     continue
+                for scale_id, condition_image_path in enumerate(CONDITION_IMAGES):
+
+                    latent1 = torch.load(condition_image_path) 
+                    latent1 = latent1.to(device, dtype=weight_dtype)
+                    latent1 = latent1.view(1,-1)
+                    if latent1.shape[-1] != 768:
+                        latent1 = network.global_dim_converter(latent1)
+                    token1 = network.global_adapter(latent1)
+                        
+                    scale = 1.0
                     for seed_id, seed in enumerate(SEEDS):
-                        print(prompt, scale, seed)
+                        print(prompt, condition_image_path, scale, seed)
                         generator = torch.manual_seed(seed) 
                         text_input = tokenizer(prompt, padding="max_length", max_length=tokenizer.model_max_length, truncation=True, return_tensors="pt")
 
@@ -209,16 +247,23 @@ def main():
                             )
                         uncond_embeddings = text_encoder(uncond_input.input_ids.to(torch_device))[0]
 
+                        # concatenate the unconditioned and conditioned text embeddings
+                        uncond_embeddings = torch.cat([uncond_embeddings, token1], dim=1)
+                        text_embeddings = torch.cat([text_embeddings, token1], dim=1)
+
+
                         text_embeddings = torch.cat([uncond_embeddings, text_embeddings])
+                        
 
                         latents = torch.randn(
                             (batch_size, unet.in_channels, height // 8, width // 8),
                             generator=generator,
                         )
                         latents = latents.to(torch_device)
-                        #latents = noise_scheduler.add_noise(white_latents, latents, torch.tensor([999]).to(torch_device))
+                        #backup_latents = latents.clone()
+                        latents = noise_scheduler.add_noise(white_latents, latents, torch.tensor([999]).to(torch_device))
 
-
+                        #latents[:,:,16:48,16:48] = backup_latents[:,:,16:48,16:48]
 
                         noise_scheduler.set_timesteps(ddim_steps)
 
@@ -260,7 +305,11 @@ def main():
                         images = (image * 255).round().astype("uint8")
                         pil_images = [Image.fromarray(image) for image in images]
                         #images_list.append(pil_images[0])
-                        pil_images[0].save(os.path.join(output_dir, f"{prompt_id:04d}_{scale_id:04d}_{seed_id:04d}.png"))
+                        if len(lora_weights) > 1:
+                            fname = f"{lora_id:04d}.png"
+                        else:
+                            fname = f"{prompt_id:04d}_{scale_id:04d}_{seed_id:04d}.png"
+                        pil_images[0].save(os.path.join(output_dir, fname))
 
                 del network, unet
                 unet = None
