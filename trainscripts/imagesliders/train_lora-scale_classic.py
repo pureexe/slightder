@@ -24,6 +24,7 @@ import random
 import numpy as np
 import wandb
 from PIL import Image
+import json
 
 def flush():
     torch.cuda.empty_cache()
@@ -45,6 +46,7 @@ def train(
     folder_main: str,
     folders,
     scales,
+    prompt_file: Optional[str] = None,
 ):
     scales = np.array(scales)
     folders = np.array(folders)
@@ -163,9 +165,19 @@ def train(
                     settings,
                 )
             )
-
-    del tokenizer
-    del text_encoder
+    
+    ## create prompt embeds from prompt file 
+    #prompt_embeds = {}
+    if prompt_file is not None:
+        with open(prompt_file, "r") as f:
+            prompts_raw = json.load(f)
+            # for key in prompts.keys():
+            #     prompt_embeds[key] = train_util.encode_prompts(
+            #         tokenizer, text_encoder, prompts[key]
+            #     )
+    else:
+        del tokenizer
+        del text_encoder
 
     flush()
 
@@ -223,8 +235,8 @@ def train(
             ims = [im_ for im_ in ims if '.png' in im_ or '.jpg' in im_ or '.jpeg' in im_ or '.webp' in im_]
             random_sampler = random.randint(0, len(ims)-1)
 
-            img1 = Image.open(f'{folder_main}/{folder1}/{ims[random_sampler]}')#.resize((256,256))
-            img2 = Image.open(f'{folder_main}/{folder2}/{ims[random_sampler]}')#.resize((256,256))
+            img1 = Image.open(f'{folder_main}/{folder1}/{ims[random_sampler]}').resize((256,256))
+            img2 = Image.open(f'{folder_main}/{folder2}/{ims[random_sampler]}').resize((256,256))
             
             seed = random.randint(0,2*15)
             
@@ -288,6 +300,12 @@ def train(
                 print("neutral_latents:", neutral_latents[0, 0, :5, :5])
                 print("unconditional_latents:", unconditional_latents[0, 0, :5, :5])
         
+        if prompt_file is not None:
+            positive_embed = train_util.encode_prompts(
+                tokenizer, text_encoder, prompts_raw[scale_to_look]
+            )
+        else:
+            positive_embed = prompt_pair.positive
         network.set_lora_slider(scale=float(scale_to_look))
         with network:
             target_latents_high = train_util.predict_noise(
@@ -297,7 +315,7 @@ def train(
                 denoised_latents_high,
                 train_util.concat_embeddings(
                     prompt_pair.unconditional,
-                    prompt_pair.positive,
+                    positive_embed, #prompt_pair.positive,
                     prompt_pair.batch_size,
                 ),
                 guidance_scale=1,
@@ -313,6 +331,12 @@ def train(
         
         
         #network.set_lora_slider(scale=-scale_to_look)
+        if prompt_file is not None:
+            neutral_embed = positive_embed = train_util.encode_prompts(
+                tokenizer, text_encoder, prompts_raw[scale_to_look1]
+            )
+        else:
+            neutral_embed = prompt_pair.neutral
         network.set_lora_slider(scale=float(scale_to_look1))
         with network:
             target_latents_low = train_util.predict_noise(
@@ -322,7 +346,7 @@ def train(
                 denoised_latents_low,
                 train_util.concat_embeddings(
                     prompt_pair.unconditional,
-                    prompt_pair.neutral,
+                    neutral_embed, #prompt_pair.neutral,
                     prompt_pair.batch_size,
                 ),
                 guidance_scale=1,
@@ -426,9 +450,9 @@ def main(args):
             config.save.name += f'_alpha{args.alpha}'
             config.save.name += f'_rank{config.network.rank }'
             config.save.path = f'models/{config.save.name}'
-            train(config=config, prompts=prompts, device=device, folder_main = folder_main)
+            train(config=config, prompts=prompts, device=device, folder_main = folder_main, prompt_file = args.prompt_file)
     else:
-        train(config=config, prompts=prompts, device=device, folder_main = args.folder_main, folders = folders, scales = scales)
+        train(config=config, prompts=prompts, device=device, folder_main = args.folder_main, folders = folders, scales = scales, prompt_file = args.prompt_file)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -505,6 +529,20 @@ if __name__ == "__main__":
         required=False,
         default = '-2, -1,1, 2',
         help="scales for different attribute-scaled images",
+    )
+    parser.add_argument(
+        "--prompt_file",
+        type=str,
+        required=False,
+        default = None,
+        help="prompt file for text",
+    )
+    parser.add_argument(
+        "--image_size",
+        type=int,
+        required=False,
+        default = 256,
+        help="size of image to resize",
     )
     
     
