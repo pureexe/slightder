@@ -12,8 +12,15 @@ OBJECTS = [
 ]
 
 #SCALES = [1.0, 2.5]
-SCALES = [-0.5, 0.5]
-SEEDS = [807, 200, 201, 202, 800]
+#SCALES = [-0.5, 0.5]
+#SCALES = [1.0, 3.0]
+#SCALES = [0.0]
+#SCALES = [1.0, 3.0]
+#SCALES = [-1.0, 1.0]
+
+
+#SEEDS = [807, 200, 201, 202, 800]
+SEEDS = [807]
 
 import torch
 from PIL import Image
@@ -41,8 +48,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from trainscripts.textsliders.lora import LoRANetwork, DEFAULT_TARGET_REPLACE, UNET_TARGET_REPLACE_MODULE_CONV
 
 ### CONFIGURATION
-width = 512
-height = 512 
+#width = 512
+#height = 512 
+width = 256
+height = 256 
 steps = 50  
 cfg_scale = 3
 pretrained_sd_model = "CompVis/stable-diffusion-v1-4"
@@ -55,12 +64,38 @@ weight_dtype = torch.float32
 
 lora_weights = [
     #"models/unsplash2000_alpha1.0_rank4_noxattn/unsplash2000_alpha1.0_rank4_noxattn_30000steps.pt"
-    "models/ball20k_latent_alpha1.0_rank4_noxattn/ball20k_latent_alpha1.0_rank4_noxattn_30000steps.pt"
+    #"models/ball20k_latent_alpha1.0_rank4_noxattn/ball20k_latent_alpha1.0_rank4_noxattn_30000steps.pt",
+    #"models/unsplash2000_alpha1.0_rank4_noxattn/unsplash2000_alpha1.0_rank4_noxattn_30000steps.pt",
 ]
-output_dir = "output/unsplash2000/chkpt30000_-0.5_0.5/"
+
+STR = "180"
+CHECKPOINT = "500"
+lora_weights = [
+    #f"models/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn_last.pt"
+    f"models/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
+]
+
+#lora_weights = [f"models/ball20k_latent_alpha1.0_rank4_noxattn/ball20k_latent_alpha1.0_rank4_noxattn_{idx}steps.pt" for idx in range(500, 100500, 500)]
+
+#output_dir = "output/unsplash2000_1_3/chkpt10000_-1_3_standard"
+#output_dir = "output/unsplash2000_-1_1/chkpt30000_-1.0_1.0_nosolid_background_noshadow/"
+#output_dir = "output/unsplash2000_-1_1/chkpt30000_-1.0_1.0"
+#output_dir = "output/unsplash2000_1_3/chkpt30000_1_3_nosolid_background_noshadow/"
+#output_dir = "output/unsplash2000/chkpt30000_-0.5_0.5/"
+
+#output_dir = "output/unsplash2000_-1_1/chkpt30000_-1.0_1.0_nosolid_background_noshadow"
+#output_dir = "output/unsplash2000_1_3/chkpt30000_1_3"
+#output_dir = "output/unsplash2000_-1_1/vary_checkpoint_nosolid_background_noshadow"
+output_dir = f"output/bottle_shoe401_{STR}_1.0_2.0/chkpt{CHECKPOINT}"
+
 PROMPTS = [ 
-   "a photo of {}, blank gray background, solid background, shadow, heavy shadow, cast shadow",
+    #"a photo of {}, blank gray background, solid background, shadow, heavy shadow, cast shadow",
+    #"a photo of {}, shadow, heavy shadow, cast shadow",
+    #"a photo of {}",
+    "a black bottle with a red stripe on a gray background"
 ]
+SCALES = np.linspace(1.0, 2.0, 180)
+
 # timestep during inference when we switch to LoRA scale>0 (this is done to ensure structure in the images)
 start_noise = 999
 
@@ -74,8 +109,6 @@ torch_device = device
 #negative_prompt = None
 negative_prompt = "fake, wax, cartoon, shadow, clutter, painting, logo, low quality"
 batch_size = 1
-height = 512
-width = 512
 ddim_steps = 50
 guidance_scale = 5.0 # OVERFIT TO GUIDANCE SCALE
 
@@ -142,7 +175,7 @@ def main():
         # for different seeds on same prompt
         for _ in range(num_images_per_prompt):
             #seed = random.randint(0, 5000)
-            for lora_weight in lora_weights:
+            for lora_id, lora_weight in enumerate(lora_weights):
             
                 if 'full' in lora_weight:
                     train_method = 'full'
@@ -216,7 +249,9 @@ def main():
                             generator=generator,
                         )
                         latents = latents.to(torch_device)
+                        
                         #latents = noise_scheduler.add_noise(white_latents, latents, torch.tensor([999]).to(torch_device))
+                        
 
 
 
@@ -260,7 +295,11 @@ def main():
                         images = (image * 255).round().astype("uint8")
                         pil_images = [Image.fromarray(image) for image in images]
                         #images_list.append(pil_images[0])
-                        pil_images[0].save(os.path.join(output_dir, f"{prompt_id:04d}_{scale_id:04d}_{seed_id:04d}.png"))
+                        if len(lora_weights) > 1:
+                            fname = f"{lora_id:04d}_{prompt_id:04d}_{scale_id:04d}_{seed_id:04d}.png"
+                        else:
+                            fname = f"{prompt_id:04d}_{scale_id:04d}_{seed_id:04d}.png"
+                        pil_images[0].save(os.path.join(output_dir, fname))
 
                 del network, unet
                 unet = None
