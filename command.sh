@@ -50,3 +50,21 @@ CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-scale_classic
 # train with text
 
 CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-scale_classic.py --name 'unsplash2000_with_text' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100.yaml' --folder_main 'datasets/scale1_2/unsplash2000_raw' --folders='_' --scales='_' --prompt_file 'datasets/scale1_2/unplash2000_blip2.json'
+
+
+
+# Experiment 
+# LoRA RANK 4, 16, 64, 256
+
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-scale_classic.py --name 'unsplash_cast_250_rank4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent.yaml' --folder_main 'datasets/scale-1_1/unsplash_cast_250' --folders='_' --scales='_' --prompt_file 'datasets/scale-1_1/unplash2000_blip2.json'
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-scale_classic.py --name 'unsplash_cast_250_rank16' --rank 16 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent.yaml' --folder_main 'datasets/scale-1_1/unsplash_cast_250' --folders='_' --scales='_' --prompt_file 'datasets/scale-1_1/unplash2000_blip2.json'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-scale_classic.py --name 'unsplash_cast_250_rank64' --rank 64 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent.yaml' --folder_main 'datasets/scale-1_1/unsplash_cast_250' --folders='_' --scales='_' --prompt_file 'datasets/scale-1_1/unplash2000_blip2.json'
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-scale_classic.py --name 'unsplash_cast_250_rank256' --rank 256 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent.yaml' --folder_main 'datasets/scale-1_1/unsplash_cast_250' --folders='_' --scales='_' --prompt_file 'datasets/scale-1_1/unplash2000_blip2.json'
+
+
+
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-scale_classic.py --name 'unsplash2000_-1.0_1.0_rank4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent.yaml' --folder_main 'datasets/scale-1_1/unsplash2000_raw' --folders='_' --scales='_'  --prompt_file 'datasets/scale-1_1/unplash2000v2_blip2.json'
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-scale_classic.py --name 'unsplash2000_-1.0_1.0_rank16' --rank 16 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent.yaml' --folder_main 'datasets/scale-1_1/unsplash2000_raw' --folders='_' --scales='_'  --prompt_file 'datasets/scale-1_1/unplash2000v2_blip2.json'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-scale_classic.py --name 'unsplash2000_-1.0_1.0_rank64' --rank 64 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent.yaml' --folder_main 'datasets/scale-1_1/unsplash2000_raw' --folders='_' --scales='_'  --prompt_file 'datasets/scale-1_1/unplash2000v2_blip2.json'
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-scale_classic.py --name 'unsplash2000_-1.0_1.0_rank256' --rank 256 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent.yaml' --folder_main 'datasets/scale-1_1/unsplash2000_raw' --folders='_' --scales='_'  --prompt_file 'datasets/scale-1_1/unplash2000v2_blip2.json'
+

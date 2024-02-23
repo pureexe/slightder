@@ -16,11 +16,12 @@ OBJECTS = [
 #SCALES = [1.0, 3.0]
 #SCALES = [0.0]
 #SCALES = [1.0, 3.0]
-#SCALES = [-1.0, 1.0]
+SCALES = [-1.0, 1.0]
+#SCALES = [1.0, 3.0]
 
 
-#SEEDS = [807, 200, 201, 202, 800]
-SEEDS = [807]
+SEEDS = [807, 200, 201, 202, 800]
+# SEEDS = [807]
 
 import torch
 from PIL import Image
@@ -68,11 +69,22 @@ lora_weights = [
     #"models/unsplash2000_alpha1.0_rank4_noxattn/unsplash2000_alpha1.0_rank4_noxattn_30000steps.pt",
 ]
 
-STR = "180"
-CHECKPOINT = "500"
+#RANK = "4"
+#RANK = "16"
+#RANK = "64"
+RANK = "256"
+#STR = "180"
+#CHECKPOINT = "19500"
+CHECKPOINT = "16000"
+#CHECKPOINT = "20000"
+#CHECKPOINT = "19000"
 lora_weights = [
     #f"models/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn_last.pt"
-    f"models/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
+    #f"models/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
+    #f"models/unsplash2000_with_text_alpha1.0_rank4_noxattn/unsplash2000_with_text_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
+    #"models/ball20k_latent_alpha1.0_rank4_noxattn/ball20k_latent_alpha1.0_rank4_noxattn_1000steps.pt"
+    #f"models/unsplash_cast_250_rank{RANK}_alpha1.0_rank{RANK}_noxattn/unsplash_cast_250_rank{RANK}_alpha1.0_rank{RANK}_noxattn_{CHECKPOINT}steps.pt"
+    f"models/unsplash2000_-1.0_1.0_rank{RANK}_alpha1.0_rank{RANK}_noxattn/unsplash2000_-1.0_1.0_rank{RANK}_alpha1.0_rank{RANK}_noxattn_{CHECKPOINT}steps.pt"
 ]
 
 #lora_weights = [f"models/ball20k_latent_alpha1.0_rank4_noxattn/ball20k_latent_alpha1.0_rank4_noxattn_{idx}steps.pt" for idx in range(500, 100500, 500)]
@@ -83,18 +95,23 @@ lora_weights = [
 #output_dir = "output/unsplash2000_1_3/chkpt30000_1_3_nosolid_background_noshadow/"
 #output_dir = "output/unsplash2000/chkpt30000_-0.5_0.5/"
 
-#output_dir = "output/unsplash2000_-1_1/chkpt30000_-1.0_1.0_nosolid_background_noshadow"
+#output_dir = "output/unsplash2000_-1_1/chkpt1000_-1.0_1.0_nosolid_background_noshadow_256"
 #output_dir = "output/unsplash2000_1_3/chkpt30000_1_3"
 #output_dir = "output/unsplash2000_-1_1/vary_checkpoint_nosolid_background_noshadow"
-output_dir = f"output/bottle_shoe401_{STR}_1.0_2.0/chkpt{CHECKPOINT}"
+#output_dir = f"output/unsplash2000_with_text/chkpt{CHECKPOINT}_background"
+#output_dir = f"output/rank_experiment/unsplash2000/{RANK}/chkpt{CHECKPOINT}_background"
+#output_dir = f"output/rank_experiment/cast250/{RANK}/chkpt{CHECKPOINT}"
+output_dir = f"output/rank_experiment/unsplash2000/{RANK}/chkpt{CHECKPOINT}"
+
 
 PROMPTS = [ 
     #"a photo of {}, blank gray background, solid background, shadow, heavy shadow, cast shadow",
+    #"a photo of {}, blank gray background, solid background",
     #"a photo of {}, shadow, heavy shadow, cast shadow",
-    #"a photo of {}",
-    "a black bottle with a red stripe on a gray background"
+    "a photo of {}",
+    # "a black bottle with a red stripe on a gray background"
 ]
-SCALES = np.linspace(1.0, 2.0, 180)
+# SCALES = np.linspace(1.0, 2.0, 180)
 
 # timestep during inference when we switch to LoRA scale>0 (this is done to ensure structure in the images)
 start_noise = 999
@@ -110,7 +127,8 @@ torch_device = device
 negative_prompt = "fake, wax, cartoon, shadow, clutter, painting, logo, low quality"
 batch_size = 1
 ddim_steps = 50
-guidance_scale = 5.0 # OVERFIT TO GUIDANCE SCALE
+#guidance_scale = 5.0 # OVERFIT TO GUIDANCE SCALE
+guidance_scale = 4.0 # OVERFIT TO GUIDANCE SCALE
 
 def flush():
     torch.cuda.empty_cache()
@@ -166,7 +184,7 @@ def main():
     scales = SCALES
 
     # white background latent
-    white_image = torch.zeros((1, 3, 512, 512)).to(device, dtype=weight_dtype)
+    white_image = torch.zeros((1, 3, height, width)).to(device, dtype=weight_dtype)
     white_latents = vae.encode(white_image).latent_dist.sample()
     white_latents = 0.18215 * white_latents
 
@@ -207,6 +225,12 @@ def main():
                     rank = 4
                 if 'rank8' in lora_weight:
                     rank = 8
+                if 'rank16' in lora_weight:
+                    rank = 16
+                if 'rank64' in lora_weight:
+                    rank = 64
+                if 'rank256' in lora_weight:
+                    rank = 256
                 if 'alpha1' in lora_weight:
                     alpha = 1.0
                 network = LoRANetwork(
