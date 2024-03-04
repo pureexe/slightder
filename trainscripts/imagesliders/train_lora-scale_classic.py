@@ -25,6 +25,7 @@ import numpy as np
 import wandb
 from PIL import Image
 import json
+import time
 
 def flush():
     torch.cuda.empty_cache()
@@ -219,11 +220,11 @@ def train(
 
             
             
-            
             # scale_to_look = abs(random.choice(list(scales_unique)))
             # folder1 = folders[scales==-scale_to_look][0]
             # folder2 = folders[scales==scale_to_look][0]
             
+
             scale_to_look = (random.choice(list(scales_unique))) #abs(random.choice(list(scales_unique)))
             scale_to_look1 =(random.choice(list(scales_unique)))
 
@@ -283,22 +284,22 @@ def train(
                 guidance_scale=1,
             ).to("cpu", dtype=torch.float32)
             # with network: の外では空のLoRAのみが有効になる
-            low_latents = train_util.predict_noise(
-                unet,
-                noise_scheduler,
-                current_timestep,
-                denoised_latents_low,
-                train_util.concat_embeddings(
-                    prompt_pair.unconditional,
-                    prompt_pair.unconditional,
-                    prompt_pair.batch_size,
-                ),
-                guidance_scale=1,
-            ).to("cpu", dtype=torch.float32)
-            if config.logging.verbose:
-                print("positive_latents:", positive_latents[0, 0, :5, :5])
-                print("neutral_latents:", neutral_latents[0, 0, :5, :5])
-                print("unconditional_latents:", unconditional_latents[0, 0, :5, :5])
+            # low_latents = train_util.predict_noise(
+            #     unet,
+            #     noise_scheduler,
+            #     current_timestep,
+            #     denoised_latents_low,
+            #     train_util.concat_embeddings(
+            #         prompt_pair.unconditional,
+            #         prompt_pair.unconditional,
+            #         prompt_pair.batch_size,
+            #     ),
+            #     guidance_scale=1,
+            # ).to("cpu", dtype=torch.float32)
+            # if config.logging.verbose:
+            #     print("positive_latents:", positive_latents[0, 0, :5, :5])
+            #     print("neutral_latents:", neutral_latents[0, 0, :5, :5])
+            #     print("unconditional_latents:", unconditional_latents[0, 0, :5, :5])
         
         if prompt_file is not None:
             positive_embed = train_util.encode_prompts(
@@ -323,7 +324,7 @@ def train(
             
             
         high_latents.requires_grad = False
-        low_latents.requires_grad = False
+        # low_latents.requires_grad = False
         
         loss_high = criteria(target_latents_high, high_noise.cpu().to(torch.float32))
         pbar.set_description(f"Loss*1k: {loss_high.item()*1000:.4f}")
@@ -365,14 +366,13 @@ def train(
         
         optimizer.step()
         lr_scheduler.step()
-
-        del (
-            high_latents,
-            low_latents,
-            #target_latents_low,
-            target_latents_high,
-        )
-        flush()
+        # del (
+        #     high_latents,
+        #     low_latents,
+        #     #target_latents_low,
+        #     target_latents_high,
+        # )
+        # flush()
 
         if (
             i % config.save.per_steps == 0

@@ -11,7 +11,7 @@ network:
 train:
   precision: "float32"
   noise_scheduler: "ddim" # or "ddpm", "lms", "euler_a"
-  iterations: 100000
+  iterations: 40000
   lr: 0.0002
   optimizer: "AdamW"
   lr_scheduler: "constant"

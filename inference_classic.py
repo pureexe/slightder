@@ -11,17 +11,19 @@ OBJECTS = [
     'scissors',
 ]
 
+
 #SCALES = [1.0, 2.5]
 #SCALES = [-0.5, 0.5]
 #SCALES = [1.0, 3.0]
 #SCALES = [0.0]
 #SCALES = [1.0, 3.0]
 SCALES = [-1.0, 1.0]
+#SCALES = [1.0, 2.0]
 #SCALES = [1.0, 3.0]
 
 
 SEEDS = [807, 200, 201, 202, 800]
-# SEEDS = [807]
+#SEEDS = [807]
 
 import torch
 from PIL import Image
@@ -63,55 +65,29 @@ device = 'cuda:0'
 rank = 4
 weight_dtype = torch.float32
 
+
+RANK = "4"
+CHECKPOINT = "10000"
 lora_weights = [
-    #"models/unsplash2000_alpha1.0_rank4_noxattn/unsplash2000_alpha1.0_rank4_noxattn_30000steps.pt"
-    #"models/ball20k_latent_alpha1.0_rank4_noxattn/ball20k_latent_alpha1.0_rank4_noxattn_30000steps.pt",
-    #"models/unsplash2000_alpha1.0_rank4_noxattn/unsplash2000_alpha1.0_rank4_noxattn_30000steps.pt",
+    #f"models/unsplash250_sh1_rank{RANK}_alpha1.0_rank{RANK}_noxattn/unsplash250_sh1_rank{RANK}_alpha1.0_rank{RANK}_noxattn_{checkpoint}steps.pt" for checkpoint in [50000]
+    #f"models/unsplash250_sh1_chkpt100_alpha1.0_rank4_noxattn/unsplash250_sh1_chkpt100_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100,40000,100)
+    f"models/unsplash250_cast250_chkpt100_alpha1.0_rank4_noxattn/unsplash250_cast250_chkpt100_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"  for checkpoint in range(100,40000,100)
 ]
 
-#RANK = "4"
-#RANK = "16"
-#RANK = "64"
-RANK = "256"
-#STR = "180"
-#CHECKPOINT = "19500"
-CHECKPOINT = "16000"
-#CHECKPOINT = "20000"
-#CHECKPOINT = "19000"
-lora_weights = [
-    #f"models/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn_last.pt"
-    #f"models/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn/shoe401_{STR}_1.0_2.0_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
-    #f"models/unsplash2000_with_text_alpha1.0_rank4_noxattn/unsplash2000_with_text_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
-    #"models/ball20k_latent_alpha1.0_rank4_noxattn/ball20k_latent_alpha1.0_rank4_noxattn_1000steps.pt"
-    #f"models/unsplash_cast_250_rank{RANK}_alpha1.0_rank{RANK}_noxattn/unsplash_cast_250_rank{RANK}_alpha1.0_rank{RANK}_noxattn_{CHECKPOINT}steps.pt"
-    f"models/unsplash2000_-1.0_1.0_rank{RANK}_alpha1.0_rank{RANK}_noxattn/unsplash2000_-1.0_1.0_rank{RANK}_alpha1.0_rank{RANK}_noxattn_{CHECKPOINT}steps.pt"
-]
+output_dir = f"output/chkpt100/unsplash250_cast250/gray"
 
-#lora_weights = [f"models/ball20k_latent_alpha1.0_rank4_noxattn/ball20k_latent_alpha1.0_rank4_noxattn_{idx}steps.pt" for idx in range(500, 100500, 500)]
 
-#output_dir = "output/unsplash2000_1_3/chkpt10000_-1_3_standard"
-#output_dir = "output/unsplash2000_-1_1/chkpt30000_-1.0_1.0_nosolid_background_noshadow/"
-#output_dir = "output/unsplash2000_-1_1/chkpt30000_-1.0_1.0"
-#output_dir = "output/unsplash2000_1_3/chkpt30000_1_3_nosolid_background_noshadow/"
-#output_dir = "output/unsplash2000/chkpt30000_-0.5_0.5/"
-
-#output_dir = "output/unsplash2000_-1_1/chkpt1000_-1.0_1.0_nosolid_background_noshadow_256"
-#output_dir = "output/unsplash2000_1_3/chkpt30000_1_3"
-#output_dir = "output/unsplash2000_-1_1/vary_checkpoint_nosolid_background_noshadow"
-#output_dir = f"output/unsplash2000_with_text/chkpt{CHECKPOINT}_background"
-#output_dir = f"output/rank_experiment/unsplash2000/{RANK}/chkpt{CHECKPOINT}_background"
-#output_dir = f"output/rank_experiment/cast250/{RANK}/chkpt{CHECKPOINT}"
-output_dir = f"output/rank_experiment/unsplash2000/{RANK}/chkpt{CHECKPOINT}"
 
 
 PROMPTS = [ 
     #"a photo of {}, blank gray background, solid background, shadow, heavy shadow, cast shadow",
-    #"a photo of {}, blank gray background, solid background",
+    "a photo of {}, blank gray background, solid background",
     #"a photo of {}, shadow, heavy shadow, cast shadow",
-    "a photo of {}",
+    #"a photo of {}",
     # "a black bottle with a red stripe on a gray background"
+    #"a black sneaker with a red stripe on a gray background"
 ]
-# SCALES = np.linspace(1.0, 2.0, 180)
+
 
 # timestep during inference when we switch to LoRA scale>0 (this is done to ensure structure in the images)
 start_noise = 999
@@ -221,6 +197,10 @@ def main():
                 unet.to(device, dtype=weight_dtype)
                 rank = 4
                 alpha = 1
+                if 'rank1' in lora_weight:
+                    rank = 1
+                if 'rank2' in lora_weight:
+                    rank = 2
                 if 'rank4' in lora_weight:
                     rank = 4
                 if 'rank8' in lora_weight:
@@ -274,10 +254,8 @@ def main():
                         )
                         latents = latents.to(torch_device)
                         
-                        #latents = noise_scheduler.add_noise(white_latents, latents, torch.tensor([999]).to(torch_device))
-                        
-
-
+                        if "blank gray background, solid background" in prompt:
+                            latents = noise_scheduler.add_noise(white_latents, latents, torch.tensor([999]).to(torch_device))
 
                         noise_scheduler.set_timesteps(ddim_steps)
 
