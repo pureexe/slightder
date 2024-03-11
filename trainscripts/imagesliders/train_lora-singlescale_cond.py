@@ -1,3 +1,5 @@
+# Single scale Condition into  LORA Arxhitech
+
 # ref:
 # - https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py#L566
 # - https://huggingface.co/spaces/baulab/Erasing-Concepts-In-Diffusion/blob/main/train.py
@@ -13,6 +15,7 @@ from tqdm import tqdm
 import os, glob
 
 from lora import LoRANetwork, DEFAULT_TARGET_REPLACE, UNET_TARGET_REPLACE_MODULE_CONV
+from pure_util.lora_global_adapter import LoRAGlobalSingleScaleAdapter
 import train_util
 import model_util
 import prompt_util
@@ -30,15 +33,6 @@ import time
 def flush():
     torch.cuda.empty_cache()
     gc.collect()
-def prev_step(model_output, timestep, scheduler, sample):
-    prev_timestep = timestep - scheduler.config.num_train_timesteps // scheduler.num_inference_steps
-    alpha_prod_t =scheduler.alphas_cumprod[timestep]
-    alpha_prod_t_prev = scheduler.alphas_cumprod[prev_timestep] if prev_timestep >= 0 else scheduler.final_alpha_cumprod
-    beta_prod_t = 1 - alpha_prod_t
-    pred_original_sample = (sample - beta_prod_t ** 0.5 * model_output) / alpha_prod_t ** 0.5
-    pred_sample_direction = (1 - alpha_prod_t_prev) ** 0.5 * model_output
-    prev_sample = alpha_prod_t_prev ** 0.5 * pred_original_sample + pred_sample_direction
-    return prev_sample
 
 def train(
     config: RootConfig,
@@ -92,7 +86,7 @@ def train(
     vae.requires_grad_(False)
     vae.eval()
 
-    network = LoRANetwork(
+    network = LoRAGlobalSingleScaleAdapter(
         unet,
         rank=config.network.rank,
         multiplier=1.0,
@@ -169,14 +163,9 @@ def train(
             )
     
     ## create prompt embeds from prompt file 
-    #prompt_embeds = {}
     if prompt_file is not None:
         with open(prompt_file, "r") as f:
-            prompts_raw = json.load(f)
-            # for key in prompts.keys():
-            #     prompt_embeds[key] = train_util.encode_prompts(
-            #         tokenizer, text_encoder, prompts[key]
-            #     )
+            prompts_raw = json.load(f)            
     else:
         del tokenizer
         del text_encoder
@@ -220,13 +209,10 @@ def train(
                 print("batch_size:", prompt_pair.batch_size)
 
             
-            
-            # scale_to_look = abs(random.choice(list(scales_unique)))
-            # folder1 = folders[scales==-scale_to_look][0]
-            # folder2 = folders[scales==scale_to_look][0]
+        
             
 
-            scale_to_look = (random.choice(list(scales_unique))) #abs(random.choice(list(scales_unique)))
+            scale_to_look = (random.choice(list(scales_unique))) 
             scale_to_look1 =(random.choice(list(scales_unique)))
 
             folder1 = folders[scales==scale_to_look1][0]
@@ -284,23 +270,6 @@ def train(
                 ),
                 guidance_scale=1,
             ).to("cpu", dtype=torch.float32)
-            # with network: の外では空のLoRAのみが有効になる
-            # low_latents = train_util.predict_noise(
-            #     unet,
-            #     noise_scheduler,
-            #     current_timestep,
-            #     denoised_latents_low,
-            #     train_util.concat_embeddings(
-            #         prompt_pair.unconditional,
-            #         prompt_pair.unconditional,
-            #         prompt_pair.batch_size,
-            #     ),
-            #     guidance_scale=1,
-            # ).to("cpu", dtype=torch.float32)
-            # if config.logging.verbose:
-            #     print("positive_latents:", positive_latents[0, 0, :5, :5])
-            #     print("neutral_latents:", neutral_latents[0, 0, :5, :5])
-            #     print("unconditional_latents:", unconditional_latents[0, 0, :5, :5])
         
         if prompt_file is not None:
             positive_embed = train_util.encode_prompts(
@@ -332,48 +301,8 @@ def train(
         loss_high.backward()
         
         
-        # #network.set_lora_slider(scale=-scale_to_look)
-        # if prompt_file is not None:
-        #     neutral_embed = positive_embed = train_util.encode_prompts(
-        #         tokenizer, text_encoder, prompts_raw[scale_to_look1]
-        #     )
-        # else:
-        #     neutral_embed = prompt_pair.neutral
-        # network.set_lora_slider(scale=float(scale_to_look1))
-        # with network:
-        #     target_latents_low = train_util.predict_noise(
-        #         unet,
-        #         noise_scheduler,
-        #         current_timestep,
-        #         denoised_latents_low,
-        #         train_util.concat_embeddings(
-        #             prompt_pair.unconditional,
-        #             neutral_embed, #prompt_pair.neutral,
-        #             prompt_pair.batch_size,
-        #         ),
-        #         guidance_scale=1,
-        #     ).to("cpu", dtype=torch.float32)
-            
-            
-        # high_latents.requires_grad = False
-        # low_latents.requires_grad = False
-        
-        # loss_low = criteria(target_latents_low, low_noise.cpu().to(torch.float32))
-        # pbar.set_description(f"Loss*1k: {loss_low.item()*1000:.4f}")
-        # loss_low.backward()
-        
-        ## NOTICE NO zero_grad between these steps (accumulating gradients) 
-        #following guidelines from Ostris (https://github.com/ostris/ai-toolkit)
-        
         optimizer.step()
         lr_scheduler.step()
-        # del (
-        #     high_latents,
-        #     low_latents,
-        #     #target_latents_low,
-        #     target_latents_high,
-        # )
-        # flush()
 
         if (
             i % config.save.per_steps == 0

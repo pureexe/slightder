@@ -1,4 +1,5 @@
 ## LoRA with global control
+ACTUAL_SCALE = 1.0
 from einops import rearrange
 
 from torch import nn
@@ -69,7 +70,7 @@ class GlobalAdapter(nn.Module):
         x = rearrange(x, 'b (n d) -> b n d', n=self.channel_mult[-1], d=self.in_dim).contiguous()
         return x
     
-class LoRAGlobalAdapter(LoRANetwork):
+class LoRAGlobalSingleScaleAdapter(LoRANetwork):
     def __init__(self, *args, **kwargs):
         if 'global_dim' in kwargs:
             global_dim = kwargs['global_dim']
@@ -90,6 +91,15 @@ class LoRAGlobalAdapter(LoRANetwork):
         super().__init__(*args, **kwargs)
         self.global_adapter = GlobalAdapter(global_dim, global_mult)
         self.global_dim_converter = nn.Linear(converter_dim, global_dim)
+
+    def forward(self, x):
+        
+        ones = torch.ones(x.size(0), 768, device=x.device) #[B,768] as an input
+        global_token = self.global_adapter(ones * self.scale)
+        lora_input = torch.cat([x, global_token], dim=1) # need to verify dimension
+        return (
+            self.org_forward(x) + self.lora_up(self.lora_down(lora_input)) * self.multiplier * ACTUAL_SCALE
+        )
 
 # class LoRAGlobalAdapter(LoRAModule):
 #     def __init__(self, org_module, lora_dim, alpha, multiplier, train_method, channel_mult=[2, 4]):

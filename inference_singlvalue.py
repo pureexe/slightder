@@ -1,7 +1,8 @@
+ACTUAL_SCALE = 1.0
 OBJECTS = [
     #'shoe',
     # 'cake',
-    'bottle',
+    # 'bottle',
     # 'chair',
     # 'cup',
     # 'laptop',
@@ -11,26 +12,16 @@ OBJECTS = [
     # 'scissors',
 ]
 
-# OBJECTS = ['shoe']
+OBJECTS = ['']
 
 
-#SCALES = [1.0, 2.5]
-#SCALES = [-0.5, 0.5]
-#SCALES = [1.0, 3.0]
-#SCALES = [0.0]
-#SCALES = [1.0, 3.0]
-#SCALES = [-1.0, 1.0]
-#SCALES = [1.0]
+#SCALES = [-1.0, 0.0, 1.0]
 #SCALES = [-1.0]
-#SCALES = [-1.0, 1.0]
-SCALES = [0.0]
-#SCALES = [1.0, 2.0]
-#SCALES = [1.0, 3.0]
 
 
-SEEDS = range(0, 10000, 100)
+#SEEDS = range(0, 10000, 100)
 
-#SEEDS = [807, 200, 201, 202, 800]
+SEEDS = [807, 200, 201, 202, 800]
 #SEEDS = [807]
 
 import torch
@@ -57,6 +48,44 @@ from diffusers.loaders import AttnProcsLayers
 from diffusers.models.attention_processor import LoRAAttnProcessor, AttentionProcessor
 from typing import Any, Dict, List, Optional, Tuple, Union
 from trainscripts.textsliders.lora import LoRANetwork, DEFAULT_TARGET_REPLACE, UNET_TARGET_REPLACE_MODULE_CONV
+#from trainscripts.imagesliders.pure_util.lora_global_adapter import LoRAGlobalSingleScaleAdapter
+from torch import nn
+
+from trainscripts.imagesliders.pure_util.lora_global_adapter import FeedForward, GlobalAdapter, GEGLU
+
+
+class LoRAGlobalSingleScaleAdapter(LoRANetwork):
+    def __init__(self, *args, **kwargs):
+        if 'global_dim' in kwargs:
+            global_dim = kwargs['global_dim']
+            kwargs.pop('global_dim')
+        else:
+            global_dim = 768
+        if 'global_mult' in kwargs:
+            global_mult = kwargs['global_mult']
+            kwargs.pop('global_mult')
+        else:
+            global_mult = [2, 4]
+        if 'converter_dim' in kwargs:
+            converter_dim = kwargs['converter_dim']
+            kwargs.pop('converter_dim')
+        else:
+            converter_dim = 768
+
+        super().__init__(*args, **kwargs)
+        self.global_adapter = GlobalAdapter(global_dim, global_mult)
+        self.global_dim_converter = nn.Linear(converter_dim, global_dim)
+
+    def forward(self, x):
+        
+        ones = torch.ones(x.size(0), 768, device=x.device) #[B,768] as an input
+        global_token = self.global_adapter(ones * self.scale)
+        lora_input = torch.cat([x, global_token], dim=1) # need to verify dimension
+        return (
+            self.org_forward(x) + self.lora_up(self.lora_down(lora_input)) * self.multiplier * ACTUAL_SCALE
+        )
+
+
 
 ### CONFIGURATION
 width = 512
@@ -76,37 +105,27 @@ weight_dtype = torch.float32
 
 RANK = "4"
 CHECKPOINT = "10000"
-LEARNING_RATE = "5e-5"
+LEARNING_RATE = "1e-4"
+SCALES = [0.25]
 lora_weights = [
-    #f"models/unsplash250_sh1_rank{RANK}_alpha1.0_rank{RANK}_noxattn/unsplash250_sh1_rank{RANK}_alpha1.0_rank{RANK}_noxattn_{checkpoint}steps.pt" for checkpoint in [50000]
-    #f"models/unsplash250_sh1_chkpt100_alpha1.0_rank4_noxattn/unsplash250_sh1_chkpt100_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100,40000,100)
-    #f"models/unsplash250_cast250_chkpt100_alpha1.0_rank4_noxattn/unsplash250_cast250_chkpt100_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"  for checkpoint in range(100,40000,100)
-    #f"models/unsplash250_sh1_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/unsplash250_sh1_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"  for checkpoint in range(100, 40000, 100)
-    #f"models/512_unsplash250_sh1_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_sh1_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 40000, 100)
-    #f"models/512_unsplash250_sh1_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_sh1_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
-    #f"models/512_unsplash250_cast_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 40000, 100)
-    f"models/512_unsplash250_cast_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
+    #f"models/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
+    f"models/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 25100, 100)
 ]
 
-#output_dir = f"output/chkpt100/512_unsplash250_learning_rate/ckpt{CHECKPOINT}_{LEARNING_RATE}/gray"
-#output_dir = f"output/chkpt100/512_unsplash250_learning_rate/{LEARNING_RATE}/gray"
-#output_dir = f"output/chkpt100/512_unsplash250_cast_learning_rate/{LEARNING_RATE}/gray"
-output_dir = f"output/chkpt100/512_unsplash250_cast_learning_rate/ckpt{CHECKPOINT}_{LEARNING_RATE}_bottle_zero/gray"
-#output_dir = f"output/chkpt100/512_unsplash250_cast_learning_rate/{LEARNING_RATE}/gray"
-#output_dir = f"output/chkpt100/512_unsplash250_cast_learning_rate/without_scale/gray"
+
+#output_dir = f"output/chkpt100/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_shoescale/scale_{SCALES[0]:.02f}/gray"
+output_dir = f"output/chkpt100/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_mountain_scale/scale_{SCALES[0]:.02f}/color"
 
 
 
-PROMPTS = [ 
-    #"a photo of {}, blank gray background, solid background, shadow, heavy shadow, cast shadow",
-    #"a photo of {}, blank gray background, solid background",
-    #"a photo of colorful {}, close-up, product photography, commercial photography, white lighting, studio lighting,   a slightly angled side-view, high resolution photography, blank gray background, solid background",
-    #"a photo of {}, close-up, product photography, commercial photography, white lighting, studio lighting, a slightly angled side-view, a slightly angled top-view, blank gray background, solid background",
-    "a photo of {}, close-up, product photography, commercial photography, white lighting, studio lighting, a slightly look down camera, blank gray background, solid background",
-    #"a photo of {}, shadow, heavy shadow, cast shadow",
-    #"a photo of {}",
-    # "a black bottle with a red stripe on a gray background"
-    #"a black sneaker with a red stripe on a gray background"
+# PROMPTS = [ 
+#     "a photo of {}, close-up, product photography, commercial photography, white lighting, studio lighting, a slightly look down camera, blank gray background, solid background",
+# ]
+
+PROMPTS = [
+    #"a mountain with a person on top"
+    "a lighthouse on a grassy field, high resolution, professional photo, photo"
+    #"the mountains are covered in snow and clouds"
 ]
 
 
@@ -121,13 +140,12 @@ num_images_per_prompt = 1
 
 torch_device = device
 negative_prompt = None
-#negative_prompt = "fake, wax, cartoon, shadow, clutter, painting, logo, low quality"
 batch_size = 1
 ddim_steps = 50
-#guidance_scale = 5.0 # OVERFIT TO GUIDANCE SCALE
-#guidance_scale = [4.0] # OVERFIT TO GUIDANCE SCALE
-#guidance_scales = np.arange(1.0, 100.0, 0.5)
-guidance_scales = [5.0]
+
+#guidance_scales = [5.0]
+guidance_scales = [7.0]
+
 
 def flush():
     torch.cuda.empty_cache()
@@ -237,13 +255,15 @@ def main():
                     rank = 256
                 if 'alpha1' in lora_weight:
                     alpha = 1.0
-                network = LoRANetwork(
+                #network = LoRANetwork(
+                network = LoRAGlobalSingleScaleAdapter(
                         unet,
                         rank=rank,
                         multiplier=1.0,
                         alpha=alpha,
                         train_method=train_method,
                     ).to(device, dtype=weight_dtype)
+
                 network.load_state_dict(torch.load(lora_weight))
                 images_list = []
 

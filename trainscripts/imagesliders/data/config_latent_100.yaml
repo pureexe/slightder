@@ -12,7 +12,7 @@ train:
   precision: "float32"
   noise_scheduler: "ddim" # or "ddpm", "lms", "euler_a"
   iterations: 40000
-  lr: 0.0002
+  lr: 0.0002 #2e-4
   optimizer: "AdamW"
   lr_scheduler: "constant"
   max_denoising_steps: 50
