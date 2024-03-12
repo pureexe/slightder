@@ -20,10 +20,11 @@ OBJECTS = [
 #SCALES = [0.0]
 #SCALES = [1.0, 3.0]
 #SCALES = [-1.0, 1.0]
+SCALES = [-1.0, 1.0, 0.0]
 #SCALES = [1.0]
 #SCALES = [-1.0]
 #SCALES = [-1.0, 1.0]
-SCALES = [0.0]
+#SCALES = [0.0]
 #SCALES = [1.0, 2.0]
 #SCALES = [1.0, 3.0]
 
@@ -88,10 +89,14 @@ lora_weights = [
     f"models/512_unsplash250_cast_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
 ]
 
+
+start_noise = 199
+stop_noise = 0
+
 #output_dir = f"output/chkpt100/512_unsplash250_learning_rate/ckpt{CHECKPOINT}_{LEARNING_RATE}/gray"
 #output_dir = f"output/chkpt100/512_unsplash250_learning_rate/{LEARNING_RATE}/gray"
 #output_dir = f"output/chkpt100/512_unsplash250_cast_learning_rate/{LEARNING_RATE}/gray"
-output_dir = f"output/chkpt100/512_unsplash250_cast_learning_rate/ckpt{CHECKPOINT}_{LEARNING_RATE}_bottle_zero/gray"
+output_dir = f"output/chkpt100/512_unsplash250_cast_learning_rate/ckpt{CHECKPOINT}_{LEARNING_RATE}_bottle_start{start_noise}_stop{stop_noise}/gray"
 #output_dir = f"output/chkpt100/512_unsplash250_cast_learning_rate/{LEARNING_RATE}/gray"
 #output_dir = f"output/chkpt100/512_unsplash250_cast_learning_rate/without_scale/gray"
 
@@ -111,7 +116,7 @@ PROMPTS = [
 
 
 # timestep during inference when we switch to LoRA scale>0 (this is done to ensure structure in the images)
-start_noise = 999
+
 
 # seed for random number generator
 seed = 0
@@ -298,7 +303,7 @@ def main():
                             latent_model_input = torch.cat([latents] * 2)
                             
                             for t in tqdm(noise_scheduler.timesteps):
-                                if t>start_noise:
+                                if t>start_noise or t < stop_noise:
                                     network.set_lora_slider(scale=0)
                                 else:
                                     network.set_lora_slider(scale=scale)

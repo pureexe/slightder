@@ -1,21 +1,21 @@
 ACTUAL_SCALE = 1.0
 OBJECTS = [
-    #'shoe',
-    # 'cake',
-    # 'bottle',
-    # 'chair',
-    # 'cup',
-    # 'laptop',
-    # 'cell phone',
-    # 'keyboard',
-    # 'book',
-    # 'scissors',
+    'shoe',
+    'cake',
+    'bottle',
+    'chair',
+    'cup',
+    'laptop',
+    'cell phone',
+    'keyboard',
+    'book',
+    'scissors',
 ]
 
-OBJECTS = ['']
+#OBJECTS = ['']
 
 
-#SCALES = [-1.0, 0.0, 1.0]
+SCALES = [-1.0, 1.0,  0.0]
 #SCALES = [-1.0]
 
 
@@ -104,33 +104,36 @@ weight_dtype = torch.float32
 
 
 RANK = "4"
-CHECKPOINT = "10000"
-LEARNING_RATE = "1e-4"
-SCALES = [0.25]
+CHECKPOINT = "20000"
+LEARNING_RATE = "5e-4"
 lora_weights = [
     #f"models/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
-    f"models/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 25100, 100)
+    #f"models/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 25100, 100)
+    f"models/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
 ]
 
+
+output_dir = f"output/chkpt100/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_all/gray"
 
 #output_dir = f"output/chkpt100/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_shoescale/scale_{SCALES[0]:.02f}/gray"
-output_dir = f"output/chkpt100/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_mountain_scale/scale_{SCALES[0]:.02f}/color"
+#output_dir = f"output/chkpt100/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_mountain_scale/scale_{SCALES[0]:.02f}/color"
 
 
 
-# PROMPTS = [ 
-#     "a photo of {}, close-up, product photography, commercial photography, white lighting, studio lighting, a slightly look down camera, blank gray background, solid background",
-# ]
-
-PROMPTS = [
-    #"a mountain with a person on top"
-    "a lighthouse on a grassy field, high resolution, professional photo, photo"
-    #"the mountains are covered in snow and clouds"
+PROMPTS = [ 
+    "a photo of {}, close-up, product photography, commercial photography, white lighting, studio lighting, a slightly look down camera, blank gray background, solid background",
 ]
+
+# PROMPTS = [
+#     #"a mountain with a person on top"
+#     "a lighthouse on a grassy field, high resolution, professional photo, photo"
+#     #"the mountains are covered in snow and clouds"
+# ]
 
 
 # timestep during inference when we switch to LoRA scale>0 (this is done to ensure structure in the images)
 start_noise = 999
+stop_noise = 0 
 
 # seed for random number generator
 seed = 0
@@ -318,7 +321,7 @@ def main():
                             latent_model_input = torch.cat([latents] * 2)
                             
                             for t in tqdm(noise_scheduler.timesteps):
-                                if t>start_noise:
+                                if t> start_noise or t < stop_noise:
                                     network.set_lora_slider(scale=0)
                                 else:
                                     network.set_lora_slider(scale=scale)
