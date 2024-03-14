@@ -17,17 +17,14 @@ OBJECTS = [
 
 #SCALES = [-1.0, 1.0,  0.0]
 #SCALES = [-1.0]
-
-#SCALES = [-1.0]
 #SCALES = [1.0]
 #SCALES = [0.0]
-#SCALES = [-0.5]
-#SCALES = [0.5]
-#SCALES = [-0.75]
+# SCALES = [-0.5]
+# SCALES = [0.5]
 #SCALES = [0.75]
+#SCALES = [-0.75]
 #SCALES = [0.25]
-#SCALES = [-0.25]
-SCALES = [-0.8]
+SCALES = [-0.25]
 
 
 #SEEDS = range(0, 10000, 100)
@@ -59,11 +56,12 @@ from diffusers.loaders import AttnProcsLayers
 from diffusers.models.attention_processor import LoRAAttnProcessor, AttentionProcessor
 from typing import Any, Dict, List, Optional, Tuple, Union
 from trainscripts.textsliders.lora import LoRANetwork, DEFAULT_TARGET_REPLACE, UNET_TARGET_REPLACE_MODULE_CONV
-from trainscripts.imagesliders.pure_util.lora_global_adapter import LoRAGlobalSingleScaleAdapter
+#from trainscripts.imagesliders.pure_util.lora_global_adapter import LoRAGlobalSingleScaleAdapter
 from torch import nn
 
-from trainscripts.imagesliders.pure_util.lora_global_adapter import FeedForward, GlobalAdapter, GEGLU
+# from trainscripts.imagesliders.pure_util.lora_global_adapter import FeedForward, GlobalAdapter, GEGLU
 
+from trainscripts.imagesliders.pure_util.lora_global_adapter import LoRAGlobalMultiScaleAdapter
 
 # class LoRAGlobalSingleScaleAdapter(LoRANetwork):
 #     def __init__(self, *args, **kwargs):
@@ -115,18 +113,20 @@ weight_dtype = torch.float32
 
 
 RANK = "4"
-CHECKPOINT = "20000"
+CHECKPOINT = "2000"
 LEARNING_RATE = "5e-5"
 lora_weights = [
     #f"models/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
-    f"models/v2_512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/v2_512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 30100, 2000)
+    #f"models/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 25100, 100)
     #f"models/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
+    #f"models/512_unsplash250_cast_doublescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_doublescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt"
+    f"models/512_unsplash250_cast_doublescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_cast_doublescale_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 30100, 100)
 ]
 
 
-#output_dir = f"output/chkpt100/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_all/gray"
+#output_dir = f"output/chkpt100/512_unsplash250_cast_doublescale_chkpt100_lr{LEARNING_RATE}_all/gray"
 
-output_dir = f"output/chkpt100/v2.1_512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_shoescale/scale_{SCALES[0]:.02f}/gray"
+output_dir = f"output/chkpt100/512_unsplash250_cast_doublescale_chkpt100_lr{LEARNING_RATE}_shoescale/scale_{SCALES[0]:.02f}/gray"
 #output_dir = f"output/chkpt100/512_unsplash250_cast_singlescale_chkpt100_lr{LEARNING_RATE}_mountain_scale/scale_{SCALES[0]:.02f}/color"
 
 
@@ -270,7 +270,7 @@ def main():
                 if 'alpha1' in lora_weight:
                     alpha = 1.0
                 #network = LoRANetwork(
-                network = LoRAGlobalSingleScaleAdapter(
+                network = LoRAGlobalMultiScaleAdapter(
                         unet,
                         rank=rank,
                         multiplier=1.0,
@@ -333,9 +333,10 @@ def main():
                             
                             for t in tqdm(noise_scheduler.timesteps):
                                 if t> start_noise or t < stop_noise:
-                                    network.set_lora_slider(scale=0)
+                                    lora_scale = torch.tensor([[0.0, 0.0]])
                                 else:
-                                    network.set_lora_slider(scale=scale)
+                                    lora_scale = torch.tensor([[scale, 0.0]])
+                                network.set_lora_slider(scale=lora_scale)
                                 # expand the latents if we are doing classifier-free guidance to avoid doing two forward passes.
                                 latent_model_input = torch.cat([latents] * 2)
 

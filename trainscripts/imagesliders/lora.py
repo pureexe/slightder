@@ -120,6 +120,7 @@ class LoRANetwork(nn.Module):
         multiplier: float = 1.0,
         alpha: float = 1.0,
         train_method: TRAINING_METHODS = "full",
+        module_class = LoRAModule,
     ) -> None:
         super().__init__()
         self.lora_scale = 1
@@ -128,7 +129,7 @@ class LoRANetwork(nn.Module):
         self.alpha = alpha
 
         # LoRAのみ
-        self.module = LoRAModule
+        self.module = module_class #LoRAModule
 
         # unetのloraを作る
         self.unet_loras = self.create_modules(
