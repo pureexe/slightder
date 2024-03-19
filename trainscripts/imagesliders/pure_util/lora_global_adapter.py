@@ -155,6 +155,45 @@ class LoRAGlobalMultiScaleAdapter(LoRADisabledScaleMetwork):
             self.org_forward(x) + self.lora_up(self.lora_down(lora_input)) * self.multiplier * ACTUAL_SCALE
         )
 
+class LoRAMappingNetwork(LoRANetwork):
+    def __init__(self, *args, **kwargs):
+        if 'global_input_dim' in kwargs:
+            global_input_dim = kwargs['global_input_dim']
+            kwargs.pop('global_input_dim')
+        else:
+            global_input_dim = 2
+
+        if 'global_dim' in kwargs:
+            global_dim = kwargs['global_dim']
+            kwargs.pop('global_dim')
+        else:
+            global_dim = 768
+        if 'global_mult' in kwargs:
+            global_mult = kwargs['global_mult']
+            kwargs.pop('global_mult')
+        else:
+            global_mult = [2, 4]
+        if 'converter_dim' in kwargs:
+            converter_dim = kwargs['converter_dim']
+            kwargs.pop('converter_dim')
+        else:
+            converter_dim = 768
+
+        super().__init__(*args, **kwargs)
+        self.global_input = nn.Sequential(
+            nn.Linear(global_input_dim, global_dim),
+            nn.Tanh() #Why TANH? because we previous experiment dataset with scale [-1,1] and it completly work just fine
+        )
+        self.global_adapter = GlobalAdapter(global_dim, global_mult)
+        self.global_dim_converter = nn.Linear(converter_dim, global_dim)
+
+    def get_global_token(self, x):
+        token_input = self.global_input(x)  #[1,768]
+        global_token = self.global_adapter(token_input) #[4,768]
+        return global_token
+
+    
+
 
 # class LoRAGlobalAdapter(LoRAModule):
 #     def __init__(self, org_module, lora_dim, alpha, multiplier, train_method, channel_mult=[2, 4]):

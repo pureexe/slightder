@@ -1,4 +1,6 @@
 datasets/
 models/
 output/
+attn_maps*/
+
 *.pyc

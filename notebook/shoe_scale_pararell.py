@@ -16,13 +16,13 @@ OBJECTS = [
     'shoe',
 ]
 SCALES = [-1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0]
-LORA_CHKPT = range(100, 30100, 2000)
+LORA_CHKPT = range(100, 37800, 100)
 #LORA_CHKPT = range(100, 14100, 100)
 SEEDS = [807, 200, 201, 202, 800]
 LEARNING_RATE = "5e-5"
 #ROOT_DIR = "../output/chkpt100/512_unsplash250_cast_doublescale_chkpt100_lr5e-5_shoescale/"
 #ROOT_DIR = "../output/chkpt100/v2_512_unsplash250_cast_singlescale_chkpt100_lr5e-5_shoescale"
-ROOT_DIR = "../output/chkpt100/v2.1_512_unsplash250_cast_singlescale_chkpt100_lr5e-5_shoescale"
+ROOT_DIR = "../output/chkpt100/512_unsplash250_mapnet_single_chkpt100_lr1e-4_scale_v2"
 COLOR_TYPE="gray"
 
 def add_text(content):
@@ -77,7 +77,7 @@ def build_row(image_id):
 
 def main():
     # create text 
-    if False:
+    if True:
 
         jobs = []
         for idx in range(0, len(SCALES)):

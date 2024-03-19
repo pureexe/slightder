@@ -130,3 +130,7 @@ CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-doublescale_c
 
 
 CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-singlescale_cond.py --name 'v2_512_unsplash250_cast_singlescale_chkpt100_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-5.yaml' --folder_main 'datasets/v1/scale-1_1/unsplash_cast_250' --folders='_' --scales='_' --prompt_file 'datasets/v1/scale-1_1/unplash2000_blip2.json' --image_size 512
+
+
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet.py --name '512_unsplash250_mapnet_single_chkpt100_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-4.yaml' --folder_main 'datasets/v2/unsplash250cast'
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet.py --name '512_unsplash250_mapnet_single_chkpt100_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-5.yaml' --folder_main 'datasets/v2/unsplash250cast'
