@@ -178,18 +178,32 @@ class LoRAMappingNetwork(LoRANetwork):
             kwargs.pop('converter_dim')
         else:
             converter_dim = 768
+        
+        if 'learnable_matrix' in kwargs:
+            learnable_matrix = kwargs['learnable_matrix']
+            kwargs.pop('learnable_matrix')
+        else:
+            learnable_matrix = None
 
         super().__init__(*args, **kwargs)
         self.global_input = nn.Sequential(
             nn.Linear(global_input_dim, global_dim),
             nn.Tanh() #Why TANH? because we previous experiment dataset with scale [-1,1] and it completly work just fine
         )
-        self.global_adapter = GlobalAdapter(global_dim, global_mult)
-        self.global_dim_converter = nn.Linear(converter_dim, global_dim)
+        if learnable_matrix is None:
+            self.global_adapter = GlobalAdapter(global_dim, global_mult)
+            self.global_dim_converter = nn.Linear(converter_dim, global_dim)
+            self.learnable_matrix = None
+        else:
+            generator = torch.Generator().manual_seed(0)
+            self.learnable_matrix = nn.Parameter(torch.normal(0, 1, size=(learnable_matrix, 4, 768), generator=generator), requires_grad=True)
 
     def get_global_token(self, x):
-        token_input = self.global_input(x)  #[1,768]
-        global_token = self.global_adapter(token_input) #[4,768]
+        if self.learnable_matrix is None:
+            token_input = self.global_input(x)  #[1,768]
+            global_token = self.global_adapter(token_input) #[4,768]
+        else:
+            global_token = self.learnable_matrix[x]
         return global_token
 
     

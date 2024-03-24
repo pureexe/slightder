@@ -134,3 +134,10 @@ CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-singlescale_c
 
 CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet.py --name '512_unsplash250_mapnet_single_chkpt100_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-4.yaml' --folder_main 'datasets/v2/unsplash250cast'
 CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet.py --name '512_unsplash250_mapnet_single_chkpt100_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-5.yaml' --folder_main 'datasets/v2/unsplash250cast'
+
+
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name '512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-5.yaml' --folder_main 'datasets/v2/unsplash250cast'
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name '512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr5e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-4.yaml' --folder_main 'datasets/v2/unsplash250cast'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name '512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr5e-3' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-3.yaml' --folder_main 'datasets/v2/unsplash250cast'
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name '512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-4.yaml' --folder_main 'datasets/v2/unsplash250cast'
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name '512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr1e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-5.yaml' --folder_main 'datasets/v2/unsplash250cast'
