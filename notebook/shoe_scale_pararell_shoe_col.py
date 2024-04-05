@@ -15,14 +15,18 @@ from tqdm.auto import tqdm
 OBJECTS = [
     'shoe',
 ]
-SCALES = [24.00, 174.00, 158.00, 228.00]
-LORA_CHKPT = range(500, 40000, 500)
+#SCALES = [24.00, 174.00, 158.00, 228.00]
+SCALES = [0.0]
+#LORA_CHKPT = range(500, 40000, 500)
+LORA_CHKPT = range(1000, 40000, 1000)
 #LORA_CHKPT = range(100, 14100, 100)
 SEEDS = [807, 200, 201, 202, 800]
-LEARNING_RATE = "5e-5"
+LEARNING_RATE = "1e-4"
+BIN = 16
 #ROOT_DIR = "../output/chkpt100/512_unsplash250_cast_doublescale_chkpt100_lr5e-5_shoescale/"
 #ROOT_DIR = "../output/chkpt100/v2_512_unsplash250_cast_singlescale_chkpt100_lr5e-5_shoescale"
-ROOT_DIR = f"../output/chkpt100/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_scale"
+#ROOT_DIR = f"../output/chkpt100/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_scale"
+ROOT_DIR = f"../output/chkpt100/512_unsplash250_mapnetlearnmatrix_interpolate_chkpt100_lr{LEARNING_RATE}_bin{BIN}_overfit02_5seed"
 COLOR_TYPE="gray"
 
 def add_text(content):
@@ -70,7 +74,9 @@ def build_row(image_id):
                 image = torch.zeros(3, 256, 256).to(torch.uint8)
             images.append(image)
     images = torch.stack(images)
-    grid = torchvision.utils.make_grid(images, nrow=len(SCALES))
+    #nrow = len(SCALES)
+    nrow = len(SEEDS)
+    grid = torchvision.utils.make_grid(images, nrow=nrow)
     grid = torchvision.transforms.ToPILImage()(grid)
     output_name = f"{ROOT_DIR}/{COLOR_TYPE}_row/{lora_id:04d}.png"
     grid.save(output_name)
