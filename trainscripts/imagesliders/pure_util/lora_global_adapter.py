@@ -155,7 +155,7 @@ class LoRAGlobalMultiScaleAdapter(LoRADisabledScaleMetwork):
             self.org_forward(x) + self.lora_up(self.lora_down(lora_input)) * self.multiplier * ACTUAL_SCALE
         )
 
-class LoRAMappingNetwork(LoRANetwork):
+class LoRAMappingNetwork(LoRADisabledScaleMetwork):
     def __init__(self, *args, **kwargs):
         if 'global_input_dim' in kwargs:
             global_input_dim = kwargs['global_input_dim']
@@ -186,11 +186,12 @@ class LoRAMappingNetwork(LoRANetwork):
             learnable_matrix = None
 
         super().__init__(*args, **kwargs)
-        self.global_input = nn.Sequential(
-            nn.Linear(global_input_dim, global_dim),
-            nn.Tanh() #Why TANH? because we previous experiment dataset with scale [-1,1] and it completly work just fine
-        )
+        
         if learnable_matrix is None:
+            self.global_input = nn.Sequential(
+                nn.Linear(global_input_dim, global_dim),
+                #nn.Tanh() #Why TANH? because we previous experiment dataset with scale [-1,1] and it completly work just fine
+             )
             self.global_adapter = GlobalAdapter(global_dim, global_mult)
             self.global_dim_converter = nn.Linear(converter_dim, global_dim)
             self.learnable_matrix = None
@@ -205,6 +206,21 @@ class LoRAMappingNetwork(LoRANetwork):
         else:
             global_token = self.learnable_matrix[x]
         return global_token
+    
+    def prepare_optimizer_params(self):
+        all_params = []
+
+        all_params = all_params + super().prepare_optimizer_params()
+
+        if self.learnable_matrix is not None:
+            all_params.append({"params": self.learnable_matrix})
+        else:
+            all_params.append({"params":self.global_input.parameters()})
+            all_params.append({"params":self.global_adapter})
+            all_params.append({"params":self.global_dim_converter})
+
+
+        return all_params
 
     
 

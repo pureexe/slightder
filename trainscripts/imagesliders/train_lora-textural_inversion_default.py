@@ -1,8 +1,4 @@
-# Single scale Condition into  LORA Arxhitech
-
-# ref:
-# - https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py#L566
-# - https://huggingface.co/spaces/baulab/Erasing-Concepts-In-Diffusion/blob/main/train.py
+# Train textural inversion for 
 
 from typing import List, Optional
 import argparse
@@ -15,7 +11,7 @@ from tqdm import tqdm
 import os, glob
 
 from lora import LoRANetwork, DEFAULT_TARGET_REPLACE, UNET_TARGET_REPLACE_MODULE_CONV
-from pure_util.lora_global_adapter import LoRAMappingNetwork
+from pure_util.textural_inversion import TexturalInversionNetwork
 from pure_util.datasets.image_axis3 import ImageAxis3Dataset
 import train_util
 import model_util
@@ -90,14 +86,14 @@ def train(
     vae.requires_grad_(False)
     vae.eval()
 
-    network = LoRAMappingNetwork(
-        unet,
-        learnable_matrix=num_of_bin,
-        rank=config.network.rank,
-        multiplier=1.0,
-        alpha=config.network.alpha,
-        train_method=config.network.training_method,
-        global_input_dim=1
+    network = TexturalInversionNetwork(
+        # unet,
+        # learnable_matrix=num_of_bin,
+        # rank=config.network.rank,
+        # multiplier=1.0,
+        # alpha=config.network.alpha,
+        # train_method=config.network.training_method,
+        # global_input_dim=1
     ).to(device, dtype=weight_dtype)
     ALL_BIN = np.linspace(-1, 1, num_of_bin)
     ALL_BIN_TENSOR = torch.tensor(ALL_BIN).to(device)
@@ -269,11 +265,7 @@ def train(
 
         uncond_embed = torch.cat([prompt_pair.unconditional, global_token], axis=-2)
         positive_embed = torch.cat([prompt_pair.positive, global_token], axis=-2)
-        embbeding = train_util.concat_embeddings(
-                    uncond_embed,
-                    positive_embed, #prompt_pair.positive,
-                    prompt_pair.batch_size,
-        )
+
 
         with network:
             target_latents_high = train_util.predict_noise(
@@ -281,7 +273,11 @@ def train(
                 noise_scheduler,
                 current_timestep,
                 denoised_latents_high,
-                embbeding,
+                train_util.concat_embeddings(
+                    uncond_embed,
+                    positive_embed, #prompt_pair.positive,
+                    prompt_pair.batch_size,
+                ),
                 guidance_scale=1,
             ).to("cpu", dtype=torch.float32)
             
@@ -290,6 +286,13 @@ def train(
         loss_high = criteria(target_latents_high, high_noise.cpu().to(torch.float32))
         pbar.set_description(f"Loss*1k: {loss_high.item()*1000:.4f}")
         loss_high.backward()
+        
+        print("==============================================")
+        print("==============================================")
+        print(network.learnable_matrix.grad)
+        print("==============================================")
+        print("==============================================")
+        exit()
         
         optimizer.step()
         lr_scheduler.step()
