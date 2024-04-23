@@ -14,19 +14,23 @@ from tqdm.auto import tqdm
 
 LORA_CHKPT = range(1000, 40000, 1000)
 SEEDS = [807, 200, 201, 202, 800]
-LEARNING_RATE = "1e-3"
+#LEARNING_RATE = "1e-3"
 #LEARNING_RATE = "1e-4"
 #LEARNING_RATE = "5e-4"
-#LEARNING_RATE = "5e-5"
-SCENE = "unsplash250cast"
+LEARNING_RATE = "5e-5"
+SCENE = "beach"
 IMAGE_ID = 3
 # INPUT_DIR = f"../output/textural_inversion/raw/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
 # ROW_DIR = f"../output/textural_inversion/row/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
 # OUTPUT_DIR = f"../output/textural_inversion/text/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
 
-INPUT_DIR = f"../output/textural_inversion/raw/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
-ROW_DIR = f"../output/textural_inversion/row/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattnn"
-OUTPUT_DIR = f"../output/textural_inversion/text/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
+# INPUT_DIR = f"../output/textural_inversion/raw/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
+# ROW_DIR = f"../output/textural_inversion/row/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattnn"
+# OUTPUT_DIR = f"../output/textural_inversion/text/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
+
+INPUT_DIR = f"../output/textural_inversion/raw/textural_inversion_classic_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
+ROW_DIR = f"../output/textural_inversion/row/textural_inversion_classic_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
+OUTPUT_DIR = f"../output/textural_inversion/text/textural_inversion_classic_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
 
 def add_text(content):
     prompt_id = 0

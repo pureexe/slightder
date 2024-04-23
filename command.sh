@@ -219,3 +219,77 @@ CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnm
 CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'v2_mapnetlearnmatrix_interpolate_chkpt100_unsplash250cast_lr1e-3' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-3.yaml' --folder_main 'datasets/v2/unsplash250cast' --num_of_bin 2
 
 
+# Baseline of textural inversion 
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-textural_inversion_classic.py --name 'textural_inversion_classic_beach_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-4.yaml' --folder_main 'datasets/v2/textural/beach'
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-textural_inversion_classic.py --name 'textural_inversion_classic_beach_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-3.yaml' --folder_main 'datasets/v2/textural/beach'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-textural_inversion_classic.py --name 'textural_inversion_classic_beach_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-4.yaml' --folder_main 'datasets/v2/textural/beach'
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-textural_inversion_classic.py --name 'textural_inversion_classic_beach_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-5.yaml' --folder_main 'datasets/v2/textural/beach'
+
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-textural_inversion_classic.py --name 'textural_inversion_classic_2girls_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-4.yaml' --folder_main 'datasets/v2/textural/2girls'
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-textural_inversion_classic.py --name 'textural_inversion_classic_2girls_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-3.yaml' --folder_main 'datasets/v2/textural/beach'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-textural_inversion_classic.py --name 'textural_inversion_classic_2girls_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-4.yaml' --folder_main 'datasets/v2/textural/beach'
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-textural_inversion_classic.py --name 'textural_inversion_classic_2girls_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-5.yaml' --folder_main 'datasets/v2/textural/beach'
+
+
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'v2_mapnetlearnmatrix_interpolate_chkpt100_2scenes_no_prompt_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-5.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'v2_mapnetlearnmatrix_interpolate_chkpt100_2scenes_no_prompt__lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-4.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'v2_mapnetlearnmatrix_interpolate_chkpt100_2scenes_no_prompt__lr5e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-4.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'v2_mapnetlearnmatrix_interpolate_chkpt100_2scenes_no_prompt__lr1e-3' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-3.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt' --num_of_bin 2
+
+# NO prompt 0,1
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt100_2scenes_no_prompt_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-5.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt_0_1' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt100_2scenes_no_prompt_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-4.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt_0_1' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt100_2scenes_no_prompt_lr5e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-4.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt_0_1' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt100_2scenes_no_prompt_lr1e-3' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-3.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt_0_1' --num_of_bin 2
+
+
+
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_chkpt100_2scenes_lr2e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr2e-5.yaml' --folder_main 'datasets/v2/textural/2scenes'
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_chkpt100_2scenes_lr1e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-5.yaml' --folder_main 'datasets/v2/textural/2scenes'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_chkpt100_2scenes_lr5e-6' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr5e-6.yaml' --folder_main 'datasets/v2/textural/2scenes'
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_chkpt100_2scenes_lr1e-6' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100_lr1e-6.yaml' --folder_main 'datasets/v2/textural/2scenes'
+
+
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_100k_2scenes_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr5e-5.yaml' --folder_main 'datasets/v2/textural/2scenes'
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_100k_2scenes_lr3e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr3e-5.yaml' --folder_main 'datasets/v2/textural/2scenes'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_100k_2scenes_lr2e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr2e-5.yaml' --folder_main 'datasets/v2/textural/2scenes'
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_100k_2scenes_lr1e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr1e-5.yaml' --folder_main 'datasets/v2/textural/2scenes'
+
+# interpolate on shoe401_360 from 1e-3 to 5e-5
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_360_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr5e-5.yaml' --folder_main 'datasets/v2/shoe401_360' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_360_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr1e-4.yaml' --folder_main 'datasets/v2/shoe401_360' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_360_lr5e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr5e-4.yaml' --folder_main 'datasets/v2/shoe401_360' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_360_lr1e-3' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr1e-3.yaml' --folder_main 'datasets/v2/shoe401_360' --num_of_bin 2
+7
+# interpolate on shoe401_few from 1e-3 to 5e-5
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_few_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr5e-5.yaml' --folder_main 'datasets/v2/shoe401_few' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_few_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr1e-4.yaml' --folder_main 'datasets/v2/shoe401_few' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_few_lr5e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr5e-4.yaml' --folder_main 'datasets/v2/shoe401_few' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_few_lr1e-3' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr1e-3.yaml' --folder_main 'datasets/v2/shoe401_few' --num_of_bin 2
+
+
+# TEST shoe with 2 pair to see if thing still working correctly or not 
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_two_image_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr5e-5.yaml' --folder_main 'datasets/v2/shoe401_two_image'
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_two_image_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr1e-4.yaml' --folder_main 'datasets/v2/shoe401_two_image'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_two_image_lr5e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr5e-4.yaml' --folder_main 'datasets/v2/shoe401_two_image'
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_two_image_lr1e-3' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr1e-3.yaml' --folder_main 'datasets/v2/shoe401_two_image'
+
+
+# interpolate v2
+
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_front_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr5e-5.yaml' --folder_main 'datasets/v2/shoe401_front' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_front_lr5e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr5e-4.yaml' --folder_main 'datasets/v2/shoe401_front' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_front_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr1e-4.yaml' --folder_main 'datasets/v2/shoe401_front' --num_of_bin 2
+CUDA_VISIBLE_DEVICES=3 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix_interpolate.py --name 'mapnetlearnmatrix_interpolate_chkpt1000_shoe401_front_lr1e-3' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr1e-3.yaml' --folder_main 'datasets/v2/shoe401_front' --num_of_bin 2
+
+
+# test swap input image
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_chkpt1000_2scenes_no_prompt_swap_image_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr5e-5.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt_swap_image'
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_chkpt1000_2scenes_no_prompt_swap_image_lr3e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr3e-5.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt_swap_image'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_chkpt1000_2scenes_no_prompt_swap_image_lr2e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_100k_lr2e-5.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt_swap_image'
+
+# train with max step 1000
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_denosing1000_2scenes_no_prompt_lr5e-5' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_denosing1000_lr5e-5.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt'
+CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_denosing1000_2scenes_no_prompt_lr5e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_denosing1000_lr5e-4.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_denosing1000_2scenes_no_prompt_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_denosing1000_lr1e-4.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt'
+CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_denosing1000_2scenes_no_prompt_lr1e-3' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_denosing1000_lr1e-3.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt'

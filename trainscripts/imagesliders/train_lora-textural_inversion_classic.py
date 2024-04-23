@@ -1,9 +1,4 @@
-# Single scale Condition into  LORA Arxhitech
-
-# ref:
-# - https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py#L566
-# - https://huggingface.co/spaces/baulab/Erasing-Concepts-In-Diffusion/blob/main/train.py
-
+# classic training of textural inversion by adding ", "+cat behind the string
 from typing import List, Optional
 import argparse
 import ast
@@ -15,7 +10,7 @@ from tqdm import tqdm
 import os, glob
 
 from lora import LoRANetwork, DEFAULT_TARGET_REPLACE, UNET_TARGET_REPLACE_MODULE_CONV
-from pure_util.lora_global_adapter import LoRAMappingNetwork
+from pure_util.textural_inversion import TexturalInversionNetwork
 from pure_util.datasets.image_axis3 import ImageAxis3Dataset
 import train_util
 import model_util
@@ -90,17 +85,10 @@ def train(
     vae.requires_grad_(False)
     vae.eval()
 
-    network = LoRAMappingNetwork(
-        unet,
-        learnable_matrix=num_of_bin,
-        rank=config.network.rank,
-        multiplier=1.0,
-        alpha=config.network.alpha,
-        train_method=config.network.training_method,
-        global_input_dim=1
+    network = TexturalInversionNetwork(
+        learnable_size = 1
     ).to(device, dtype=weight_dtype)
-    ALL_BIN = np.linspace(-1, 1, num_of_bin)
-    ALL_BIN_TENSOR = torch.tensor(ALL_BIN).to(device)
+
     network.set_lora_slider(scale=1.0) #Set LoRA Scale to default
 
     optimizer_module = train_util.get_optimizer(config.train.optimizer)
@@ -192,6 +180,17 @@ def train(
                 tokenizer, text_encoder, batch['text'][0]
             )
 
+            token_output = tokenizer(
+                batch['text'][0] + ", sks", #add comma to seperate
+                padding="max_length",
+                max_length=tokenizer.model_max_length,
+                truncation=True,
+                return_tensors="pt",
+            )# .input_ids
+            # 267 is ","
+            # 49407 is end of input id
+            token_index = token_output.input_ids.tolist()[0].index(49407) -1 # sks word
+
             noise_scheduler.set_timesteps(
                 config.train.max_denoising_steps, device=device
             )
@@ -244,42 +243,23 @@ def train(
 
         #network.set_lora_slider()
     
-        #TODO: TEMPORARY DISABLE BATCH SIZE 
-        scale = batch['coeff'].numpy()[0,:1] #[B,1]
-        bin_id = np.digitize(scale, ALL_BIN, right=True)
-        upper_bin = np.clip(bin_id - 1,0, np.inf) + 1
-        lower_bin = upper_bin - 1 
-
-        
-
-        lower_bin = torch.tensor(lower_bin).to(device).long()
-        upper_bin = torch.tensor(upper_bin).to(device).long()
-        scale = torch.tensor(scale).to(device).float()
-        #distance = np.abs((scale - ALL_BIN[lower_bin]) / (ALL_BIN[upper_bin] - ALL_BIN[lower_bin]))
-        distance = (scale - ALL_BIN_TENSOR[lower_bin]) / (ALL_BIN_TENSOR[upper_bin] - ALL_BIN_TENSOR[lower_bin])
-        
-        global_upper = network.get_global_token(torch.tensor(ALL_BIN_TENSOR[upper_bin]).to(device).long()).to(device) #[1,4,768]
-        global_lower = network.get_global_token(torch.tensor(ALL_BIN_TENSOR[lower_bin]).to(device).long()).to(device) #[1,4,768]
-        # print("============================================")
-        # print("distance:", distance)
-        # print("scale:", scale)
-        # print("upper_bin:", upper_bin)
-        # print("lower_bin:", lower_bin)
-        # print("============================================")
-        #global_token = global_lower + distance * (global_upper - global_lower) #[1,4,768]
-        global_token = ((1 - distance) * global_lower) + ((distance) * global_upper)
-        global_token = global_token.float()
 
         # compute global token
-        #global_token = network.get_global_token(batch['id'][...,:1].to(device)) # [1,4,768 ]
+        global_token = network.get_global_token(0) # [1,768 ]
+        
+        global_token = global_token.unsqueeze(0) # [1,1,768]
+        global_token  = global_token.expand(-1, 77, -1)
 
-        uncond_embed = torch.cat([prompt_pair.unconditional, global_token], axis=-2)
-        positive_embed = torch.cat([prompt_pair.positive, global_token], axis=-2)
-        embbeding = train_util.concat_embeddings(
-                    uncond_embed,
-                    positive_embed, #prompt_pair.positive,
-                    prompt_pair.batch_size,
-        )
+        with torch.no_grad():
+            embed_mask = torch.zeros_like(global_token)
+            embed_mask[:, token_index] = torch.ones_like(embed_mask[:, token_index])
+        
+
+
+        uncond_embed = prompt_pair.unconditional
+        positive_embed = prompt_pair.positive
+
+        positive_embed = positive_embed * (1 - embed_mask) + global_token * embed_mask
 
         with network:
             target_latents_high = train_util.predict_noise(
@@ -287,7 +267,11 @@ def train(
                 noise_scheduler,
                 current_timestep,
                 denoised_latents_high,
-                embbeding,
+                train_util.concat_embeddings(
+                    uncond_embed,
+                    positive_embed, #prompt_pair.positive,
+                    prompt_pair.batch_size,
+                ),
                 guidance_scale=1,
             ).to("cpu", dtype=torch.float32)
             

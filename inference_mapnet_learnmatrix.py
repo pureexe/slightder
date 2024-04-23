@@ -1,6 +1,7 @@
 ACTUAL_SCALE = 1.0
 OBJECTS = [
-    'shoe',
+    '',
+    #'shoe',
     # 'cake',
     # 'bottle',
     # 'chair',
@@ -28,11 +29,11 @@ OBJECTS = [
 #SCALES = [-0.25]
 
 #SCALES = [24]
-SCALES = [174]
+#SCALES = [174]
+#SCALES = np.linspace(-1,1,60)
 
 #SCALES = [158]
 #SCALES = [228]
-print("VERSION: ", SCALES)
 
 # From right - 2wWJ--XoTyg.png: 24
 # From right - eh_Q3gHA8gM.png: 174
@@ -41,8 +42,8 @@ print("VERSION: ", SCALES)
 
 #SEEDS = range(0, 10000, 100)
 
-SEEDS = [807, 200, 201, 202, 800]
-#SEEDS = [807]
+#SEEDS = [807, 200, 201, 202, 800]
+SEEDS = [807]
 
 import torch
 from PIL import Image
@@ -100,29 +101,55 @@ device = 'cuda:0'
 rank = 4
 weight_dtype = torch.float32
 
-
+#SCENE = "2scenes"
 RANK = "4"
-CHECKPOINT = "30000"
-#LEARNING_RATE = "5e-5"
+#CHECKPOINT = "39900"
+#CHECKPOINT = "50000"
+SCENE = "2scenes_no_prompt_swap_image"
+CHECKPOINT = "40000"
+#SCENE = "2scenes_no_prompt"
+#CHECKPOINT = "70000"
+checkpoint = CHECKPOINT
+#LEARNING_RATE = "5e-4"
 #LEARNING_RATE = "1e-4"
-LEARNING_RATE = "5e-4"
+#LEARNING_RATE = "1e-3"
+LEARNING_RATE = "5e-5"
+#LEARNING_RATE = "3e-5"
+#LEARNING_RATE = "2e-5"
+#LEARNING_RATE = "1e-5"
+#LEARNING_RATE = "5e-6"
+#LEARNING_RATE = "1e-6"
+IMAGE_ID = 2
+SCALES = [IMAGE_ID-1]
+SEEDS = range(0, 100)
+#SCALES = np.linspace(-1,1,60)
+print("VERSION: ", SCALES)
+
 lora_weights = [
     #f"models/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt",
     #f"models/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 40100, 500)
-    f"models/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"  for checkpoint in range(500, 40500, 500)
+    #f"models/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"  for checkpoint in range(500, 40500, 500)
+    #f"models/mapnetlearnmatrix_chkpt100_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_chkpt100_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
+    #f"models/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
+    #f"models/mapnetlearnmatrix_100k_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_100k_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_last.pt"
+    #f"models/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_last.pt"
+    #f"models/mapnetlearnmatrix_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
+    #f"models/mapnetlearnmatrix_denosing1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_denosing1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
+    f"models/mapnetlearnmatrix_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
 ]
 
 
-
 #output_dir = f"output/chkpt100/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}/chkpt{CHECKPOINT}/gray"
-output_dir = f"output/chkpt100/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_scale/scale_{SCALES[0]:.02f}_/gray"
-
+#output_dir = f"output/chkpt100/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_scale/scale_{SCALES[0]:.02f}_/gray"
+output_dir = f"output/textural_inversion/raw/mapnetlearnmatrix_chkpt1000_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_100_{CHECKPOINT}steps_v2"
+#output_dir = f"output/textural_inversion/raw/mapnetlearnmatrix_denosing1000_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_100_{CHECKPOINT}steps"
 
 
 PROMPTS = [ 
-        "a photo of {}, close-up, product photography, commercial photography, white lighting, studio lighting, a slightly look down camera, blank gray background, solid background",
+    #"a photo of {}, close-up, product photography, commercial photography, white lighting, studio lighting, a slightly look down camera, blank gray background, solid background",
     #"{}, gray background",
     #"{}"
+    ""
 ]
 
 # timestep during inference when we switch to LoRA scale>0 (this is done to ensure structure in the images)
@@ -141,7 +168,8 @@ batch_size = 1
 ddim_steps = 50
 
 #guidance_scales = [5.0]
-guidance_scales = [7.0]
+#guidance_scales = [7.0]
+guidance_scales = [0.0]
 
 
 def flush():
@@ -271,7 +299,6 @@ def main():
                 for scale_id, scale in enumerate(scales):
                     global_token = network.get_global_token(torch.tensor([scale]).to(device)) # [1,4,768 ]     
                     print(global_token[0,:,0])
-                    exit()
                
                     for seed_id, seed in enumerate(SEEDS):
                         for guidance_scale in guidance_scales:

@@ -32,7 +32,6 @@ OBJECTS = [
 
 #SCALES = [158]
 #SCALES = [228]
-print("VERSION: ", SCALES)
 
 # From right - 2wWJ--XoTyg.png: 24
 # From right - eh_Q3gHA8gM.png: 174
@@ -41,8 +40,8 @@ print("VERSION: ", SCALES)
 
 #SEEDS = range(0, 10000, 100)
 
-SEEDS = [807, 200, 201, 202, 800]
-#SEEDS = [807]
+#SEEDS = [807, 200, 201, 202, 800]
+SEEDS = [807]
 
 import torch
 from PIL import Image
@@ -102,28 +101,38 @@ weight_dtype = torch.float32
 
 
 RANK = "4"
-CHECKPOINT = "30000"
-LEARNING_RATE = "5e-5"
-#LEARNING_RATE = "5e-4"
+CHECKPOINT = "50000"
+checkpoint = CHECKPOINT
+#LEARNING_RATE = "1e-3"
+#LEARNING_RATE = "1e-4"
 #LEARNING_RATE = "5e-5"
-NUM_BIN = 4
+LEARNING_RATE = "5e-4"
+NUM_BIN = 2
+SCENE = "shoe401_front"
 lora_weights = [
     #f"models/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt",
     #f"models/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 40100, 500)
     #f"models/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"  for checkpoint in range(500, 40500, 500)
-    f"models/512_unsplash250_mapnetlearnmatrix_interpolate_chkpt100_lr{LEARNING_RATE}_bin{NUM_BIN}_alpha1.0_rank4_noxattn/512_unsplash250_mapnetlearnmatrix_interpolate_chkpt100_lr{LEARNING_RATE}_bin{NUM_BIN}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"  for checkpoint in range(1000, 41000, 1000)
+    #f"models/512_unsplash250_mapnetlearnmatrix_interpolate_chkpt100_lr{LEARNING_RATE}_bin{NUM_BIN}_alpha1.0_rank4_noxattn/512_unsplash250_mapnetlearnmatrix_interpolate_chkpt100_lr{LEARNING_RATE}_bin{NUM_BIN}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"  for checkpoint in range(1000, 41000, 1000)
+    f"models/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
 ]
 
 
 
 #output_dir = f"output/chkpt100/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}/chkpt{CHECKPOINT}/gray"
 #output_dir = f"output/chkpt100/512_unsplash250_mapnetlearnmatrix_interpolate_chkpt100_lr{LEARNING_RATE}_bin{NUM_BIN}_scale/scale_{SCALES[0]:.02f}/gray"
+output_dir = f"output/textural_inversion/raw/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps_scale0_image100"
+#SCALES = np.linspace(-1,1,60)
+SCALES = [0.0]
+SEEDS = list(range(0,100))
+
+print("VERSION: ", SCALES)
 
 
 PROMPTS = [ 
-        "a photo of {}, close-up, product photography, commercial photography, white lighting, studio lighting, a slightly look down camera, blank gray background, solid background",
+    #"a photo of {}, close-up, product photography, commercial photography, white lighting, studio lighting, a slightly look down camera, blank gray background, solid background",
     #"{}, gray background",
-    #"{}"
+    "{}"
 ]
 
 # timestep during inference when we switch to LoRA scale>0 (this is done to ensure structure in the images)
@@ -142,7 +151,8 @@ batch_size = 1
 ddim_steps = 50
 
 #guidance_scales = [5.0]
-guidance_scales = [7.0]
+#guidance_scales = [7.0]
+guidance_scales = [0.0]
 
 ALL_BIN = np.linspace(-1, 1, NUM_BIN)
 ALL_BIN_TENSOR = torch.tensor(ALL_BIN).to(device)
@@ -270,11 +280,11 @@ def main():
                 network.set_lora_slider(scale=1.0)
                 images_list = []
 
-                #os.makedirs(output_dir, exist_ok=True)
+                os.makedirs(output_dir, exist_ok=True)
 
                 for scale_id, scale in enumerate(scales):
                     #if len(SCALES) > 1:
-                    output_dir = f"output/chkpt100/512_unsplash250_mapnetlearnmatrix_interpolate_chkpt100_lr{LEARNING_RATE}_bin{NUM_BIN}_scale1k/scale_{scale:.02f}/gray"
+                    #output_dir = f"output/chkpt100/512_unsplash250_mapnetlearnmatrix_interpolate_chkpt100_lr{LEARNING_RATE}_bin{NUM_BIN}_scale1k/scale_{scale:.02f}/gray"
                     os.makedirs(output_dir, exist_ok=True)
                     #global_token = network.get_global_token(torch.tensor([scale]).to(device)) # [1,4,768 ]     
                     #print(global_token[0,:,0])
@@ -389,6 +399,7 @@ def main():
                             pil_images = [Image.fromarray(image) for image in images]
                             
                             pil_images[0].save(os.path.join(output_dir, fname))
+                            print(output_dir)
 
                             # dir_name = "attn_maps"
                             # net_attn_maps = get_net_attn_map(pil_images[0].size)

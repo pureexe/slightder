@@ -13,12 +13,13 @@ class TexturalInversionNetwork(nn.Module):
     def __init__(
         self,
         learnable_matrix = 1,
+        learnable_size=4,
         *args, 
         **kwargs
     ) -> None:
         super().__init__()
         generator = torch.Generator().manual_seed(0)
-        self.learnable_matrix = self.learnable_matrix = nn.Parameter(torch.normal(0, 1, size=(learnable_matrix, 4, 768), generator=generator), requires_grad=True)
+        self.learnable_matrix = self.learnable_matrix = nn.Parameter(torch.normal(0, 1, size=(learnable_matrix, learnable_size, 768), generator=generator), requires_grad=True)
 
     def prepare_optimizer_params(self):
         return self.parameters() 

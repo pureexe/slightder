@@ -13,23 +13,26 @@ import skimage
 from tqdm.auto import tqdm
 
 #LORA_CHKPT = range(1000, 40000, 1000)
-LORA_CHKPT = range(30000, 31000, 1000)
+LORA_CHKPT = range(39900, 40000, 100)
 SEEDS = [807, 200, 201, 202, 800]
 LEARNING_RATE = "1e-3"
 #LEARNING_RATE = "1e-4"
 #LEARNING_RATE = "5e-4"
 #LEARNING_RATE = "5e-5"
-SCENE = "unsplash250cast"
+SCENE = "2scenes_no_prompt"
 #SCENE = "2scenes"
-IMAGE_ID = 3
+IMAGE_ID = 1
 # INPUT_DIR = f"../output/textural_inversion/raw/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
 # ROW_DIR = f"../output/textural_inversion/row/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
 # OUTPUT_DIR = f"../output/textural_inversion/text/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
 
-SCALES = [-1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-INPUT_DIR = f"../output/textural_inversion/raw/v2_mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_scale"
-ROW_DIR = f"../output/textural_inversion/row/v2_mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattnn_scale"
-OUTPUT_DIR = f"../output/textural_inversion/text/v2_mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_scale"
+#SCALES = [-0.1080]
+SCALES = [0]
+#SCALES = [-1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, -0.05, 0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+#SCALES = [-1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+INPUT_DIR = f"../output/textural_inversion/raw/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
+ROW_DIR = f"../output/textural_inversion/row/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattnn"
+OUTPUT_DIR = f"../output/textural_inversion/text/mapnetlearnmatrix_interpolate_chkpt100_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn"
 
 def add_text(content):
     prompt_id = 0
@@ -49,8 +52,8 @@ def add_text(content):
 
     
     out_path = f"{folder_out}/{prompt_id:04d}_{real_scale_id:04d}_{seed_id:04d}.png"
-    if os.path.exists(out_path):
-        return None
+    #if os.path.exists(out_path):
+    #    return None
     
     folder_in = INPUT_DIR
     
@@ -62,6 +65,9 @@ def add_text(content):
         image = Image.new("RGB", (512,512), (0, 0, 0))
 
     draw = ImageDraw.Draw(image)
+    print("========")
+    print("scale", scale_name)
+    print("========")
     draw.text((10, 10),f"step: {lora_name:5d}\nseed: {seed_name:3d}\nscale: {scale_name:.2f}\nLR: {LEARNING_RATE}",(255,255,255),font=font)
     image.save(out_path)
     return None
@@ -80,7 +86,9 @@ def build_row(image_id):
                 image = torch.zeros(3, 256, 256).to(torch.uint8)
             images.append(image)
     images = torch.stack(images)
-    grid = torchvision.utils.make_grid(images, nrow=len(SCALES))
+    #num = len(SCALES)
+    num = len(SEEDS)
+    grid = torchvision.utils.make_grid(images, nrow=num)
     grid = torchvision.transforms.ToPILImage()(grid)
     output_name = f"{ROW_DIR}/{lora_id:04d}.png"
     grid.save(output_name)
@@ -106,7 +114,7 @@ def main():
     if True:
         with Pool(16) as p:
             r = list(tqdm(p.imap(build_row, range(len(LORA_CHKPT))), total=len(LORA_CHKPT)))
-
+    print(ROW_DIR)
     
 
     # create grid
