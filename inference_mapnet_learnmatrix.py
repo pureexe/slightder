@@ -12,34 +12,6 @@ OBJECTS = [
     # 'book',
     # 'scissors',
 ]
-
-#OBJECTS = ['']
-
-
-#SCALES = [-1.0, 1.0,  0.0]
-# SCALES = [-1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0]
-#SCALES = [1.0]
-#SCALES = [-1.0]
-#SCALES = [0.0]
-#SCALES = [-0.5]
-#SCALES = [0.5]
-#SCALES = [0.75]
-#SCALES = [-0.75]
-#SCALES = [0.25]
-#SCALES = [-0.25]
-
-#SCALES = [24]
-#SCALES = [174]
-#SCALES = np.linspace(-1,1,60)
-
-#SCALES = [158]
-#SCALES = [228]
-
-# From right - 2wWJ--XoTyg.png: 24
-# From right - eh_Q3gHA8gM.png: 174
-# From left - _UZJN5WmrSI.png: 158
-# From left - qsgZMnf0Uyc.png: 228
-
 #SEEDS = range(0, 10000, 100)
 
 #SEEDS = [807, 200, 201, 202, 800]
@@ -86,11 +58,10 @@ from trainscripts.imagesliders.pure_util.lora_global_adapter import LoRAMappingN
 # )
 
 #cross_attn_init()
+
 ### CONFIGURATION
 width = 512
 height = 512 
-# width = 256
-# height = 256 
 steps = 50  
 cfg_scale = 3
 pretrained_sd_model = "CompVis/stable-diffusion-v1-4"
@@ -101,48 +72,22 @@ device = 'cuda:0'
 rank = 4
 weight_dtype = torch.float32
 
-#SCENE = "2scenes"
 RANK = "4"
-#CHECKPOINT = "39900"
-#CHECKPOINT = "50000"
-SCENE = "2scenes_no_prompt_swap_image"
-CHECKPOINT = "40000"
-#SCENE = "2scenes_no_prompt"
-#CHECKPOINT = "70000"
+SCENE = "example"
+CHECKPOINT = "1000"
 checkpoint = CHECKPOINT
-#LEARNING_RATE = "5e-4"
-#LEARNING_RATE = "1e-4"
 #LEARNING_RATE = "1e-3"
-LEARNING_RATE = "5e-5"
-#LEARNING_RATE = "3e-5"
-#LEARNING_RATE = "2e-5"
-#LEARNING_RATE = "1e-5"
-#LEARNING_RATE = "5e-6"
-#LEARNING_RATE = "1e-6"
-IMAGE_ID = 2
+IMAGE_ID = 1
 SCALES = [IMAGE_ID-1]
 SEEDS = range(0, 100)
-#SCALES = np.linspace(-1,1,60)
 print("VERSION: ", SCALES)
 
 lora_weights = [
-    #f"models/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{CHECKPOINT}steps.pt",
-    #f"models/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt" for checkpoint in range(100, 40100, 500)
-    #f"models/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"  for checkpoint in range(500, 40500, 500)
-    #f"models/mapnetlearnmatrix_chkpt100_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_chkpt100_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
-    #f"models/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
-    #f"models/mapnetlearnmatrix_100k_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_100k_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_last.pt"
-    #f"models/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_interpolate_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_last.pt"
-    #f"models/mapnetlearnmatrix_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
-    #f"models/mapnetlearnmatrix_denosing1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_denosing1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
-    f"models/mapnetlearnmatrix_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn/mapnetlearnmatrix_chkpt1000_{SCENE}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
+    f"models/{SCENE}_alpha1.0_rank4_noxattn/{SCENE}_alpha1.0_rank4_noxattn_{checkpoint}steps.pt"
 ]
 
 
-#output_dir = f"output/chkpt100/512_unsplash250_mapnet_single_chkpt100_lr{LEARNING_RATE}/chkpt{CHECKPOINT}/gray"
-#output_dir = f"output/chkpt100/512_unsplash250_mapnetlearnmatrix_single_chkpt100_lr{LEARNING_RATE}_scale/scale_{SCALES[0]:.02f}_/gray"
-output_dir = f"output/textural_inversion/raw/mapnetlearnmatrix_chkpt1000_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_100_{CHECKPOINT}steps_v2"
-#output_dir = f"output/textural_inversion/raw/mapnetlearnmatrix_denosing1000_{SCENE}_i{IMAGE_ID}_lr{LEARNING_RATE}_alpha1.0_rank4_noxattn_100_{CHECKPOINT}steps"
+output_dir = f"output/{SCENE}_i{IMAGE_ID}_alpha1.0_rank4_noxattn_100_{CHECKPOINT}"
 
 
 PROMPTS = [ 

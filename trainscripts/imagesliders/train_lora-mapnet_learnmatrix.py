@@ -363,7 +363,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--alpha",
         type=float,
-        required=True,
+        required=False,
+        default=1.0,
         help="LoRA weight.",
     )
     

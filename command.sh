@@ -293,3 +293,8 @@ CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnm
 CUDA_VISIBLE_DEVICES=1 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_denosing1000_2scenes_no_prompt_lr5e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_denosing1000_lr5e-4.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt'
 CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_denosing1000_2scenes_no_prompt_lr1e-4' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_denosing1000_lr1e-4.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt'
 CUDA_VISIBLE_DEVICES=2 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'mapnetlearnmatrix_denosing1000_2scenes_no_prompt_lr1e-3' --rank 4 --alpha 1 --config_file 'trainscripts/imagesliders/data/config_latent_denosing1000_lr1e-3.yaml' --folder_main 'datasets/v2/textural/2scenes_no_prompt'
+
+
+
+# Example command 
+CUDA_VISIBLE_DEVICES=0 python trainscripts/imagesliders/train_lora-mapnet_learnmatrix.py --name 'example' --config_file 'trainscripts/imagesliders/data/config_latent_denosing1000_lr1e-3.yaml' --folder_main 'example/2scenes_no_prompt'
