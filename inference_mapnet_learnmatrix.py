@@ -76,14 +76,14 @@ from torch import nn
 
 from trainscripts.imagesliders.pure_util.lora_global_adapter import LoRAMappingNetwork
 
-from attention_map.utils import (
-    cross_attn_init,
-    register_cross_attention_hook,
-    attn_maps,
-    get_net_attn_map,
-    resize_net_attn_map,
-    save_net_attn_map,
-)
+# from attention_map.utils import (
+#     cross_attn_init,
+#     register_cross_attention_hook,
+#     attn_maps,
+#     get_net_attn_map,
+#     resize_net_attn_map,
+#     save_net_attn_map,
+# )
 
 #cross_attn_init()
 ### CONFIGURATION
